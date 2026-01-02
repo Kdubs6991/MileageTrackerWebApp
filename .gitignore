@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# IDE
+.idea/
+
+# OS junk
+.DS_Store
