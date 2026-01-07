@@ -1,5 +1,8 @@
 #Imports the Flask class (the web framework)
-from flask import Flask, render_template, request
+
+# 'redirect()' sends the browser to another page after saving
+# 'url_for("home")' generates the correct URL for your home() route
+from flask import Flask, render_template, request, redirect, url_for
 
 import sqlite3
 from pathlib import Path
@@ -42,7 +45,16 @@ def init_db():
 # inside of it. Then it reads that file and sends its contents as the HTTP
 # response.
 def home():
-        return render_template("home.html")
+    conn = get_db_connection()
+    # Gets all the rows from the database and stores it in  the template
+    # 'entries', ORDER BY date DESC shows the newest entry first, and
+    # fetchall gives a list of rows.
+    entries = conn.execute("SELECT * FROM entries ORDER BY date DESC").fetchall()
+    conn.close()
+    return render_template("home.html", entries=entries)
+
+
+
 
 
 @app.route("/add", methods=("GET", "POST"))
@@ -57,7 +69,25 @@ def add():
         earnings = request.form["earnings"]
         notes = request.form["notes"]
 
-        print(f'{date} {miles} {earnings} "{notes}"')
+        # conn is the connection to the database. Inside the conn.execute:
+        # the string is the SQL commands, then the values that are '?' are
+        # placeholders, the tuple (date, miles, earnings, notes) fills those
+        # placeholders. Commit makes the changes permanent and redirect
+        # prevents re-submitting the form if you refresh
+        conn = get_db_connection()
+        conn.execute(
+            "INSERT INTO entries (date, miles, earnings, notes) VALUES (?, ?, ?, ?)",
+            (date, miles, earnings, notes),
+        )
+        conn.commit()
+        conn.close()
+
+        # This must be inside the post block
+        return redirect(url_for("home"))
+
+        # Old print statement for initial debugging
+        #print(f'{date} {miles} {earnings} "{notes}"')
+    # This runs on GET
     return render_template("add.html")
 
 
