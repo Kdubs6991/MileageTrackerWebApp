@@ -1,33 +1,38 @@
-<! DOCTYPE html>
-<html>
-    <head>
-        <title>Add Entry</title>
-    </head>
-    <body>
-        <h1>Add Milage Entry</h1>
+{% extends "base.html" %}
 
-        <!-- A form is how the browser sends user input to the server
-        Changed the method of the form from get (which was blank) to
-        post. Did this so the data goes in the request body and not
-        appear in the URL.
-        -->
-        <form method="post">
-            <!-- Each label in here becomes a key we can read in Flask later. -->
+{% block title %}Add Entry — Mileage Tracker{% endblock %}
+
+{% block content %}
+
+<section>
+    <h2>Add Entry</h2>
+
+    <form method="post">
+        <!-- Each label in here becomes a key we can read in Flask later. -->
+        <div>
             <label>Date:</label>
             <input type="date" name="date"><br><br>
+        </div>
 
+        <div>
             <label>Miles:</label>
             <input type="number" step="0.01" name="miles"><br><br>
+        </div>
 
+        <div>
             <label>Earnings ($):</label>
             <input type="number" step="0.01" name="earnings"><br><br>
+        </div>
 
+        <div>
             <label>Notes:</label>
             <input type="text" name="notes"><br><br>
+        </div>
 
+        <div>
             <button type="submit">Save</button>
-        </form>
-
-    <a href="/">Back to home</a>
-    </body>
-</html>
+            <a href="/">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

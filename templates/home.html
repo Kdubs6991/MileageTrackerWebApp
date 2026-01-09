@@ -1,31 +1,37 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Milage Tracker</title>
-    </head>
-    <body>
-        <h1>Milage tracker</h1>
-        <p>This page is served from an HTML file.</p>
+{% extends "base.html" %}
 
-        <a href="/add">Add entry</a>
+{% block title %}Home — Mileage Tracker{% endblock %}
 
-        <table border="1" cellpadding="6">
-            <tr>
-                <th>Date</th>
-                <th>Miles</th>
-                <th>Earnings</th>
-                <th>Notes</th>
-            </tr>
+{% block content %}
+<section>
 
-            {% for entry in entries %}
-            <tr>
-                <td>{{ entry["date"] }}</td>
-                <td>{{ entry["miles"] }}</td>
-                <td>{{ entry["earnings"] }}</td>
-                <td>{{ entry["notes"] }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-    </body>
+    <p>Entries count: {{ entries|length }}</p>
 
-</html>
+    {% if entries|length == 0 %}
+        <p>No entries yet. Click <strong>Add entry</strong> to create one.</p>
+    {% else %}
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Miles</th>
+                        <th>Earnings</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                    <tr>
+                        <td> {{ entry["date"] }}</td>
+                        <td class="num">{{ entry["miles"] }}</td>
+                        <td class="num">${{ entry["earnings"] }}</td>
+                        <td>{{ entry["notes"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

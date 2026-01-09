@@ -1,0 +1,51 @@
+<!-- Base.html is a share template (called a layout in
+ an MVC project, and it holds the HTML for shared things
+ such as the header, and footer, and more. -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title%}Milage Tracker{% endblock %}</title>
+
+        <!-- Links to all the stylesheets -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexMobile.css') }}" media="screen and (max-width: 435px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexDesktop.css') }}" media="screen and (min-width: 436px)">
+    </head>
+
+    <body>
+        <!-- Header element for the top of the webpage -->
+        <header class="mainHeader">
+            <!-- Left section to add a small icon image -->
+            <div class="leftLogo">
+                'Image for looks'
+            </div>
+
+            <!-- Middle section for navigation links -->
+            <div class="middleSection">
+                <nav>
+                    'Links to add, other pages, etc.'
+                </nav>
+            </div>
+
+            <!-- Right section for external links -->
+            <div class="rightSection">
+                'links to google sheets, link tree, others'
+            </div>
+        </header>
+
+        <main class="mainBody">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <div>
+                <p>© {{ 2026 }} Mileage Tracker</p>
+            </div>
+        </footer>
+    </body>
+</html>
+
+<!-- Notes for Development use
+  • Header z-index = 1000
+ -->
