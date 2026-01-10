@@ -91,6 +91,11 @@ def add():
     return render_template("add.html")
 
 
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
 #This means only run the server if you ran this file directly
 if __name__ == "__main__":
     init_db()

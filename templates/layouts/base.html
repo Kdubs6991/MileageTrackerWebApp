@@ -1,0 +1,55 @@
+<!-- Base.html is a share template (called a layout in
+ an MVC project, and it holds the HTML for shared things
+ such as the header, and footer, and more. -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title%}Milage Tracker{% endblock %}</title>
+
+        <!-- Links to all the stylesheets -->
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexMobile.css') }}" media="screen and (max-width: 542px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexDesktop.css') }}" media="screen and (min-width: 543px)">
+    </head>
+
+    <body>
+        <!-- Header element for the top of the webpage -->
+        <header class="mainHeader">
+            <!-- Left section to add a small icon image -->
+            <div class="leftLogo">
+                <a href="{{ url_for('home') }}"><img class="doordash-logo" src="/static/images/doorDashIcon.png" alt="Door Dash Icon"></a>
+            </div>
+
+            <!-- Middle section for navigation links -->
+            <div class="middleSection">
+                <nav>
+                    <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
+                    <a class="headerNavButton" href="{{ url_for('add') }}">Add</a>
+                    <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
+                </nav>
+            </div>
+
+            <!-- Right section for external links -->
+            <div class="rightSection">
+                <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank"><img class="externalImageIcon" src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon"></a>
+                <a href="https://linktr.ee/kaloob._" target="_blank"><img class="externalImageIcon" src="/static/images/linkTreeIcon.png" alt="Link Tree Icon"></a>
+                <a href="https://github.com/Kdubs6991" target="_blank"><img class="externalImageIcon" src="/static/images/gitHubIcon.png" alt="Git Hub Icon"></a>
+            </div>
+        </header>
+
+        <main class="mainBody">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <div>
+                <p>© {{ 2026 }} Mileage Tracker</p>
+            </div>
+        </footer>
+    </body>
+</html>
+
+<!-- Notes for Development use
+  • Header z-index = 1000
+ -->

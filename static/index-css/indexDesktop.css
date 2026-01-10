@@ -18,46 +18,95 @@
     background-color: rgb(128, 128, 128);
 
     /* Adjusting the header size to fit everything */
-    height: 100px;
+    height: 70px;
 
     /* Creating a border */
     border-bottom: 2px solid dimgrey;
-
 }
 
 .leftLogo {
-    /* Setting the logo to not be too wide */
-    width: auto;
-    max-width: 100%;
     background-color: blue;
 
     /* Making the logo shrink if it gets too small */
     display: flex;
+    flex: 0.5;
     align-items: center;
     justify-content: center;
+
+    /* Padding to make the logo inside sit better */
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* left side image */
+.doordash-logo{
+    min-height: 20px;
+    max-height: 50px;
+    height: auto;
+    width: auto;
+
 }
 
 .middleSection{
     background-color: pink;
 
     /* Flexbox setup */
-    flex: 2;
+    flex: 3;
     display: flex;
     align-items: center;
-    justify content: center;
+    justify-content: center;
     max-width: 800px;
 
-    margin-left: 0px;
+}
+
+/* Navigation buttons */
+.headerNavButton{
+    background-color: #e7e7e7;
+    border-style: solid;
+    border-color: #bebebe;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #1e1e1e;
+    display: inline-block;
+
+    padding: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 20px;
 }
 
 .rightSection{
     background-color: purple;
 
     /* Flexbox setup */
-    flex: 1;
-    min-width: 200px;
+    display: flex;
+    flex: 1.2;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-around;
+    min-width: 90px;
+
+}
+
+.externalImageIcon{
+    /* Force consistent size */
+    height: 40px;
+    width: 40px;
+    object-fit: contain;
+
+    filter: grayscale(100%);
+}
+
+/**/
+/**/
+/* css for when buttons/images are hovered over */
+.doordash-logo, .headerNavButton, .externalImageIcon {
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease;
+}
+
+.doordash-logo:hover, .headerNavButton:hover, .externalImageIcon:hover {
+    transform: scale(1.2);
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 /**/
