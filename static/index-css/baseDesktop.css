@@ -1,0 +1,247 @@
+/**/
+/**/
+/* Header for desktop */
+.mainHeader{
+    /* Fixing the header to the very top of the page */
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin-top: 0;
+
+    /* Setting up the flexbox for the header */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    /* Color of the header */
+    background-color: #333333;
+
+    /* Adjusting the header size to fit everything */
+    height: 70px;
+
+    /* Creating a border */
+    border-bottom: 2px solid dimgrey;
+}
+
+.headerLogoContainer {
+    /* background-color: blue; */
+    /* background color used for development/debugging */
+
+    /* Making the logo shrink if it gets too small */
+    display: flex;
+    flex: 0.5;
+    align-items: center;
+    justify-content: center;
+
+    /* Padding to make the logo inside sit better */
+    padding-left: 10px;
+    padding-right: 10px;
+}
+/* left side image */
+.doordash-logo{
+    min-height: 20px;
+    max-height: 50px;
+    height: auto;
+    width: auto;
+    max-width: 15vw; /* Ensures logo shrinks if viewport gets very narrow */
+}
+
+.headerNavigationButtonsContainer{
+    /* background-color: pink; */
+    /* background color used for development/debugging */
+
+    /* Flexbox setup */
+    flex: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 800px;
+
+}
+
+/* Navigation buttons */
+.headerNavButton{
+    background-color: #e7e7e7;
+    border-style: solid;
+    border-color: #bebebe;
+    border-width: 2px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #1e1e1e;
+    display: inline-block;
+
+    padding: clamp(5px, 1vw, 10px); /* Shrinks padding as window gets smaller */
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: clamp(14px, 3vw, 20px); /* Shrinks text as window gets smaller */
+}
+
+.rightSection{
+    /* background-color: purple; */
+    /* background color used for development/debugging */
+
+    /* Flexbox setup */
+    display: flex;
+    flex: 1.2;
+    align-items: center;
+    justify-content: space-around;
+    min-width: 90px;
+
+}
+
+.externalImageIcon{
+    /* Force consistent size */
+    height: auto;
+    width: clamp(30px, 4vw, 40px); /* Shrinks icons as window gets smaller */
+    object-fit: contain;
+
+    filter: grayscale(100%);
+}
+
+/**/
+/**/
+/* css for when buttons/images are hovered over */
+.doordash-logo, .headerNavButton, .externalImageIcon {
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease;
+}
+
+.doordash-logo:hover, .headerNavButton:hover, .externalImageIcon:hover {
+    transform: scale(1.2);
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+
+
+/**/
+/**/
+/* Main body for desktop */
+.mainBody {
+    margin-top: 100px;
+    margin-left: 10px;
+}
+
+/**/
+/**/
+/* default browser margin's and padding removed */
+body{
+    margin: 0;
+    padding: 0;
+}
+
+
+
+/**/
+/**/
+/* Footer for desktop */
+.footer{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    margin-top: 50px;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    /* This forces the text to stay on a single line and not wrap */
+    white-space: nowrap;
+
+    background-color: #333333;
+    color: #e7e7e7;
+}
+
+/* Top Section of the footer */
+.footerTopSection{
+    display: flex;
+    flex: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    margin-top: 20px;
+}
+
+.footerNavSection{
+    flex: 1; /* Each navigation section takes up 50% of the available space */
+
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    padding-right: 4vw;
+}
+
+.footerNavContainer{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+}
+
+.footerNavSection h5 {
+    color: #d9d9d9 !important;
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+
+    border-bottom: 2px solid #d9d9d9;
+    padding-bottom: 2px;
+    align-self: flex-start;
+}
+
+.footerNavLink{
+    color: #b4b4b4;
+    text-decoration: none;
+}
+
+/* This is called a descendant selector, this finds any element with the label 'ul'
+that are only inside of an element with the class 'footerNavSection' */
+.footerNavSection ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    padding-right:  40px;
+}
+
+.footerNavSection li {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.footerNavSection li:last-child {
+    margin-right: 0;
+}
+
+/* Bottom Section of the footer */
+.footerBottomSection{
+    flex: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copyrightContainer{
+    display: flex;
+    flex: 2;
+
+    margin-left: 20px; /* Responsive margin */
+}
+
+.externalLinkContainer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    margin-right: 40px;
+}
+
+.footerExternalImageIcon{
+    height: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+    filter: grayscale(100%);
+    transition: opacity .2s;
+}

@@ -9,26 +9,40 @@
         <title>{% block title%}Milage Tracker{% endblock %}</title>
 
         <!-- Links to all the stylesheets -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexMobile.css') }}" media="screen and (max-width: 542px)">
-        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/indexDesktop.css') }}" media="screen and (min-width: 543px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/baseMobile.css') }}" media="screen and (max-width: 542px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/baseDesktop.css') }}" media="screen and (min-width: 543px)">
+
+        <style>
+             /* Ensure the mobile menu is hidden on desktop */
+             @media screen and (min-width: 543px) {
+                 .hamburgerMenu, .mobileNavOverlay {
+                     display: none !important;
+                 }
+             }
+         </style>
     </head>
 
     <body>
         <!-- Header element for the top of the webpage -->
         <header class="mainHeader">
             <!-- Left section to add a small icon image -->
-            <div class="leftLogo">
+            <div class="headerLogoContainer">
                 <a href="{{ url_for('home') }}"><img class="doordash-logo" src="/static/images/doorDashIcon.png" alt="Door Dash Icon"></a>
             </div>
 
-            <!-- Middle section for navigation links -->
-            <div class="middleSection">
-                <nav>
-                    <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
-                    <a class="headerNavButton" href="{{ url_for('add') }}">Add</a>
-                    <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
-                </nav>
+            <!-- Hamburger menu Icon (Visible on mobile only) -->
+            <div class="hamburgerMenu" onclick="toggleMenu()">
+                <div></div>
+                <div></div>
+                <div></div>
             </div>
+
+            <!-- Middle section for navigation links -->
+            <nav class="headerNavigationButtonsContainer">
+                <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
+                <a class="headerNavButton" href="{{ url_for('add') }}">Add</a>
+                <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
+            </nav>
 
             <!-- Right section for external links -->
             <div class="rightSection">
@@ -38,18 +52,78 @@
             </div>
         </header>
 
+        <div id="mobileNavOverlay" class="mobileNavOverlay">
+            <a href="javascript:void(0)" class="closeBtn" onclick="toggleMenu()">&times;</a>
+            <div class="mobileNavContent">
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('add') }}">Add</a>
+                <a href="{{ url_for('about') }}">About</a>
+
+                <div class="mobileExternalLinks">
+                     <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank">
+                         <img class="MobileExternalImageIcon" src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon">
+                         <span>Google Sheets</span>
+                     </a>
+                     <a href="https://linktr.ee/kaloob._" target="_blank">
+                         <img class="MobileExternalImageIcon" src="/static/images/linkTreeIcon.png" alt="Link Tree Icon">
+                         <span>Link Tree</span>
+                     </a>
+                     <a href="https://github.com/Kdubs6991" target="_blank">
+                         <img class="MobileExternalImageIcon" src="/static/images/gitHubIcon.png" alt="Git Hub Icon">
+                         <span>Git Hub</span>
+                     </a>
+                 </div>
+            </div>
+        </div>
+
         <main class="mainBody">
             {% block content %}{% endblock %}
         </main>
 
-        <footer>
-            <div>
-                <p>© {{ 2026 }} Mileage Tracker</p>
+        <footer class="footer">
+            <div class="footerTopSection">
+                <div class="footerNavContainer">
+                    <div class="footerNavSection">
+                        <h5>Navigation</h5>
+                        <nav>
+                            <ul>
+                                <li><a class="footerNavLink" href="{{ url_for('home') }}">Home</a></li>
+                                <li><a class="footerNavLink" href="{{ url_for('add') }}">Add</a></li>
+                                <li><a class="footerNavLink" href="{{ url_for('about') }}">About</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="footerAccountSection">
+                    <!--Use this section in future for account login and setup -->
+                </div>
+            </div>
+            <div class="footerBottomSection">
+                <div class="copyrightContainer">
+                    <p>&copy; {{ 2026 }} Mileage Tracker</p>
+                </div>
+                <div class="externalLinkContainer">
+                    <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank"><img  src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon" class="footerExternalImageIcon"></a>
+                    <a href="https://linktr.ee/kaloob._" target="_blank"><img  src="/static/images/linkTreeIcon.png" alt="Link Tree Icon" class="footerExternalImageIcon"></a>
+                    <a href="https://github.com/Kdubs6991" target="_blank"><img  src="/static/images/gitHubIcon.png" alt="Git Hub Icon" class="footerExternalImageIcon"></a>
+                </div>
             </div>
         </footer>
+
+        <script>
+            function toggleMenu() {
+                var menu = document.getElementById("mobileNavOverlay");
+                if (menu.style.width === "250px") {
+                    menu.style.width = "0";
+                } else {
+                    menu.style.width = "250px";
+                }
+            }
+        </script>
     </body>
 </html>
 
 <!-- Notes for Development use
   • Header z-index = 1000
+  • MobileNavOverlay z-index = 1100
  -->

@@ -1,0 +1,296 @@
+/**/
+/**/
+/* Header for mobile */
+.mainHeader{
+    /* Fixing the header to the very top of the page */
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    margin-top: 0;
+
+    /* Setting up the flexbox for the header */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    /* Color of the header */
+    background-color: #333333;
+
+    /* Adjusting the header size to fit everything */
+    height: 80px;
+
+    /* Creating a border */
+    border-bottom: 2px solid dimgrey;
+}
+
+.headerLogoContainer{
+    /* background-color: blue; */
+    /* background color used for development/debugging */
+
+    /* Making the logo shrink if it gets too small */
+    display: flex;
+    flex: 0.2;
+    align-items: center;
+    justify-content: center;
+    /* Force the logo to be on the right instead of the left */
+    order: 3;
+
+    /* Padding to make the logo inside sit better */
+    padding-left: 10px;
+    padding-right: 10px;
+}
+/* left side image */
+.doordash-logo{
+    min-height: 20px;
+    max-height: 50px;
+    height: auto;
+    width: auto;
+}
+
+.headerNavigationButtonsContainer{
+    /* Hide the regular nav buttons on mobile */
+    display: none;
+}
+.rightSection {
+     /* Hide the external links on mobile (they are in the menu now) */
+     display: none;
+ }
+
+.hamburgerMenu{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    order: 1; /* Places it on the left side */
+
+    width: 30px;
+    height: 25px;
+    margin-left: 20px;
+
+
+    cursor: pointer;
+}
+.hamburgerMenu div{
+    width: 30px;
+    height: 3px;
+    background-color: #e7e7e7;
+    border-radius: 2px;
+}
+
+/* Mobile menu overlay (hidden by default) */
+.mobileNavOverlay{
+    height: 100%;
+    width: 0; /* 0 width means hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    z-index: 1100; /* On top of everything */
+
+    background-color: #333333;
+    overflow-x: hidden;
+
+    /* Shadow so the drawer pops out visually*/
+    box-shadow: 3px 0 10px rgba(0,0,0,0.5);
+
+    transition: 0.3s; /* Smooth slide effect */
+}
+/* Links inside the overlay */
+.mobileNavContent a{
+    padding: 5px;
+    margin-left: 5px;
+
+    text-decoration: none;
+    font-size: clamp(18px, 5vw, 25px); /* Shrinks text as screen gets smaller */
+    color: #e7e7e7;
+    display: block;
+    transition: 0.3s;
+}
+.mobileNavOverlay .closeBtn{
+    align-self: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    font-size: clamp(30px, 10vw, 45px); /* Shrinks the X button */
+    text-decoration: none;
+    color: #dd8b8b;
+}
+.mobileExternalLinks{
+    margin-top: 30px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+/* Override the default block display to align icon and text side-by-side */
+ .mobileExternalLinks a {
+     display: flex;
+     align-items: center;
+ }
+ /* Style for the new text labels */
+ .mobileExternalLinks span {
+     margin-left: 15px;
+     font-size: clamp(16px, 4vw, 20px);
+ }
+.MobileExternalImageIcon{
+    /* Force consistent size */
+    height: auto;
+    width: clamp(30px, 8vw, 40px); /* Shrinks icons as screen gets smaller */
+    object-fit: contain;
+
+    filter: grayscale(100%);
+}
+
+/**/
+/**/
+/* css for when buttons/images are hovered over */
+.doordash-logo, .mobileNavContent a, .MobileExternalImageIcon, .closeBtn {
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease;
+}
+.doordash-logo:hover, .mobileNavContent a:hover, .MobileExternalImageIcon:hover, .closeBtn:hover {
+    transform: scale(1.1);
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+
+
+
+
+
+
+
+/**/
+/**/
+/* Main body for desktop */
+.mainBody {
+    margin-top: 150px;
+    margin-left: 10px;
+}
+
+/**/
+/**/
+/* default browser margin's and padding removed */
+body{
+    margin: 0;
+    padding: 0;
+}
+
+/**/
+/**/
+/* Footer for desktop */
+.footer{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 100%;
+    margin-top: 50px;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    /* This forces the text to stay on a single line and not wrap */
+    white-space: nowrap;
+
+    background-color: #333333;
+    color: #e7e7e7;
+}
+
+/* Top Section of the footer */
+.footerTopSection{
+    display: flex;
+    flex: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    margin-top: 20px;
+}
+
+.footerNavSection{
+    flex: 1; /* Each navigation section takes up 50% of the available space */
+
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    padding-right: 4vw;
+}
+
+.footerNavContainer{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+}
+
+.footerNavSection h5 {
+    color: #d9d9d9 !important;
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 16px;
+
+    border-bottom: 2px solid #d9d9d9;
+    padding-bottom: 2px;
+    align-self: flex-start;
+}
+
+.footerNavLink{
+    color: #b4b4b4;
+    text-decoration: none;
+}
+
+/* This is called a descendant selector, this finds any element with the label 'ul'
+that are only inside of an element with the class 'footerNavSection' */
+.footerNavSection ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    padding-right:  40px;
+}
+
+.footerNavSection li {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.footerNavSection li:last-child {
+    margin-right: 0;
+}
+
+/* Bottom Section of the footer */
+.footerBottomSection{
+    flex: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copyrightContainer{
+    display: flex;
+    flex: 2;
+
+    margin-left: 10px
+}
+
+.externalLinkContainer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    margin-right: 40px;
+}
+
+.footerExternalImageIcon{
+    height: auto;
+    width: clamp(20px, 7vw, 30px);
+    margin-left: 10px;
+    margin-right: 10px;
+    filter: grayscale(100%);
+    transition: opacity .2s;
+}

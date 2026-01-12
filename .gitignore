@@ -11,3 +11,6 @@ __pycache__/
 
 # OS junk
 .DS_Store
+
+#Development Notes on what to do next
+TODO.md
