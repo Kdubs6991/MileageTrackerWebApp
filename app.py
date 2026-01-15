@@ -1,9 +1,8 @@
-#Imports the Flask class (the web framework)
-
-# 'redirect()' sends the browser to another page after saving
-# 'url_for("home")' generates the correct URL for your home() route
+# Imports the Flask class (the web framework)
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime, timedelta, date
+import csv
+import io
 from utils import calculate_stats
 
 import sqlite3
@@ -19,6 +18,9 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+# 'redirect()' sends the browser to another page after saving
+# 'url_for("home")' generates the correct URL for your home() route
 
 # 'CREATE TABLE IF NOT EXISTS' basically means 'make it if it's not already there'
 # 'id ... AUTOINCREMENT' unique ID for each entry
@@ -77,9 +79,53 @@ def add():
         # Logic: snap the selected date to the Monday of that week
         dt = datetime.strptime(date_str, '%Y-%m-%d')
         monday_of_week = dt - timedelta(days=dt.weekday())
+        sunday_of_week = monday_of_week + timedelta(days=6)
         date_to_save = monday_of_week.strftime('%Y-%m-%d')
 
-        miles = request.form["miles"]
+        # ------------------------------------------------
+        # Miles Logic: Check file first, then manual input
+        # ------------------------------------------------
+        miles = 0.0
+        file_processed = False
+
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename != '':
+                # A file was uploaded. Read it and calculate the miles from it
+                file_processed = True
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.DictReader(stream)
+
+                for row in csv_input:
+                    # Stride CSV headers: "Date", "Distance"
+                    row_date_str = row.get("Date")
+                    dist_str = row.get("Distance")
+
+                    if not row_date_str or not dist_str:
+                        continue
+                    row_dt = None
+                    for fmt in ('%m/%d/%Y', '%Y-%m-%d'):
+                        try:
+                            row_dt = datetime.strptime(row_date_str, fmt)
+                            break
+                        except ValueError:
+                            continue
+
+                    if not row_dt: continue
+
+                    # Check if this trip falls within the selected week
+                    if monday_of_week.date() <= row_dt.date() <= sunday_of_week.date():
+                        try:
+                            trip_miles = float(dist_str.replace(" mi", "").strip())
+                            miles += trip_miles
+                        except ValueError:
+                            continue
+
+        if not file_processed:
+            manual_miles = request.form.get("miles")
+            if manual_miles:
+                miles = float(manual_miles)
+
         earnings = request.form["earnings"]
         notes = request.form["notes"]
 
@@ -107,7 +153,7 @@ def add():
 #
 # App route for the Edit page
 #
-@app.route("/edit/<int:id>", methods=("Get", "POST"))
+@app.route("/edit/<int:id>", methods=("GET", "POST"))
 def edit(id):
     conn = get_db_connection()
     # Fetch the specific entry by ID so we can pre-fill the form

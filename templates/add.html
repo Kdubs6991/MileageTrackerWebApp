@@ -13,7 +13,12 @@
 <div class="contentContainer">
     <h1>Add Entry</h1>
 
-    <form method="post" class="addForm">
+     <hr style="border: 0; border-top: 1px solid #ccc; margin-bottom: 30px;">
+
+     <!-- Option 2: Manual Entry -->
+     <h2>Option 2: Manual Entry</h2>
+
+    <form method="post" class="addForm" enctype="multipart/form-data">
         <div class="formInputContainer">
             <label for="date">Week of (Select any day)</label><br>
             <input type="date" name="date" id="date" required class="formInput" value="{{ today }}">
@@ -21,7 +26,12 @@
 
         <div class="formInputContainer">
             <label for="miles">Miles</label><br>
-            <input type="number" name="miles" id="miles" required class="formInput">
+           <input type="number" step="0.01" name="miles" id="miles" class="formInput" placeholder="0.00">
+
+            <div class="fileInputContainer">
+                <label for="file" class="fileInputLabel">Or upload Stride CSV:</label>
+                <input type="file" name="file" id="file" accept=".csv" class="formInput fileInput">
+            </div>
         </div>
 
         <div class="formInputContainer">
