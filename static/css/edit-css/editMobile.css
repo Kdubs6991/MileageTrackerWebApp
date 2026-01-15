@@ -1,0 +1,112 @@
+.contentContainer{
+    margin-left: 10px;
+}
+
+.editForm{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    width: 100%;
+    max-width: 260px;
+}
+.formInputContainer{
+    max-width: 260px;
+}
+.notesInputContainer{
+    max-width: 260px;
+}
+
+/* Wrapper to hold the dollar sign and input*/
+.currencyWrapper{
+    position: relative;
+    max-width: 260px;
+}
+
+/* Dollar sign itself*/
+.currencySymbol{
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    color: #333;
+    pointer-events: none; /* Allows clicking through the symbol to the input */
+}
+/* Add padding so text doesn't overlap the $ initially */
+.currencyWrapper .formInput {
+ padding-left: 25px;
+}
+
+.formInput{
+    padding: 8px;
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.formButtons{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.submitBtn, .cancelBtn, .deleteBtn{
+    padding: 10px;
+
+    border: none;
+    cursor: pointer;
+
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: 600;
+
+    box-sizing: border-box;
+    width: 100%
+    display: inline-block;
+
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.submitBtn{
+    background-color: #2563eb; /* blue */
+    color: white;
+}
+.submitBtn:hover{
+    background-color: #1d4ed8;
+
+    transform: scale(1.05);
+}
+.submitBtn:active{
+    transform: scale(0.98);
+}
+.cancelBtn{
+  background-color: #6b7280; /* gray */
+  color: white;
+
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+.cancelBtn:hover{
+  background-color: #4b5563;
+
+  transform: scale(1.05);
+}
+.cancelBtn:active{
+  transform: scale(0.98);
+}
+
+.deleteBtn{
+  background-color: #dc2626; /* red */
+  color: white;
+}
+.deleteBtn:hover{
+    background-color: #b91c1c;
+
+  transform: scale(1.05);
+}
+.deleteBtn:active{
+    transform: scale(0.98);
+}

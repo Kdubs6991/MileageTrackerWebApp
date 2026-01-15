@@ -3,6 +3,8 @@
 # 'redirect()' sends the browser to another page after saving
 # 'url_for("home")' generates the correct URL for your home() route
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import datetime, timedelta, date
+from utils import calculate_stats
 
 import sqlite3
 from pathlib import Path
@@ -38,7 +40,9 @@ def init_db():
 
 #-----------------------------------------------------------------------
 
-#A route: When someone visits / (the home URL), run the function below
+#
+# App route for the home/main page
+#
 @app.route("/")
 #This is the function that handles that page. When the render_template()
 # runs, it looks for a folder named "templates/" and finds home.html
@@ -46,17 +50,21 @@ def init_db():
 # response.
 def home():
     conn = get_db_connection()
-    # Gets all the rows from the database and stores it in  the template
-    # 'entries', ORDER BY date DESC shows the newest entry first, and
-    # fetchall gives a list of rows.
-    entries = conn.execute("SELECT * FROM entries ORDER BY date DESC").fetchall()
+    # Gets all the rows from the database
+    rows = conn.execute("SELECT * FROM entries ORDER BY date DESC").fetchall()
     conn.close()
-    return render_template("home.html", entries=entries)
 
+    # Convert rows to dictionaries so utils.py can modify the data (add week_num, etc.)
+    entries = [dict(row) for row in rows]
 
+    # Calculate totals and add calculated fields to entries
+    totals = calculate_stats(entries) #function in utils.py file
 
+    return render_template("home.html", entries=entries, **totals)
 
-
+#
+# App Route for the Add page
+#
 @app.route("/add", methods=("GET", "POST"))
 def add():
     # the 'request.method' tells how the page was accessed
@@ -64,7 +72,13 @@ def add():
     # the keys come from the name in "..." in HTML
     # the print statement outputs to the console
     if request.method == "POST":
-        date = request.form["date"]
+        date_str = request.form["date"]
+
+        # Logic: snap the selected date to the Monday of that week
+        dt = datetime.strptime(date_str, '%Y-%m-%d')
+        monday_of_week = dt - timedelta(days=dt.weekday())
+        date_to_save = monday_of_week.strftime('%Y-%m-%d')
+
         miles = request.form["miles"]
         earnings = request.form["earnings"]
         notes = request.form["notes"]
@@ -77,7 +91,7 @@ def add():
         conn = get_db_connection()
         conn.execute(
             "INSERT INTO entries (date, miles, earnings, notes) VALUES (?, ?, ?, ?)",
-            (date, miles, earnings, notes),
+            (date_to_save, miles, earnings, notes),
         )
         conn.commit()
         conn.close()
@@ -88,9 +102,69 @@ def add():
         # Old print statement for initial debugging
         #print(f'{date} {miles} {earnings} "{notes}"')
     # This runs on GET
-    return render_template("add.html")
+    return render_template("add.html", today=date.today())
+
+#
+# App route for the Edit page
+#
+@app.route("/edit/<int:id>", methods=("Get", "POST"))
+def edit(id):
+    conn = get_db_connection()
+    # Fetch the specific entry by ID so we can pre-fill the form
+    entry = conn.execute('SELECT * FROM entries WHERE id = ?', (id,)).fetchone()
+
+    # if the request is a POST request, it will update the database with the
+    # new values from the form, commit the changes to the database, and then
+    # redirect to the home page
+    if request.method == "POST":
+        date_str = request.form["date"]
+
+        # Logic: Snap the selected date to the Monday of that week
+        dt = datetime.strptime(date_str, '%Y-%m-%d')
+        monday_of_week = dt - timedelta(days=dt.weekday())
+        date_to_save = monday_of_week.strftime('%Y-%m-%d')
+
+        miles = request.form["miles"]
+        earnings = request.form["earnings"]
+        notes = request.form["notes"]
+
+        conn.execute(
+            "UPDATE entries SET date = ?, miles = ?, earnings = ?, notes = ? WHERE id = ?",
+            (date_to_save, miles, earnings, notes, id),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("home"))
+
+    # if the request is a GET request, it will render the edit.html template
+    conn.close()
+
+    # Convert row to dictionary and format numbers to 2 decimal places
+    if entry:
+        entry = dict(entry)
+        entry['miles'] = "{:.2f}".format(entry['miles'])
+        entry['earnings'] = "{:.2f}".format(entry['earnings'])
+
+    return render_template("edit.html", entry=entry)
+
+#
+# App route for delete (not a page)
+# This App route only has a POST method because there is no delete page
+#
+@app.route("/delete/<int:id>", methods=("POST",))
+def delete(id):
+    conn = get_db_connection()
+    conn.execute('DELETE FROM entries WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("home"))
 
 
+#
+# App route for the About page
+#
 @app.route("/about")
 def about():
     return render_template("about.html")

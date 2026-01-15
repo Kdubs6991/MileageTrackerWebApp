@@ -1,0 +1,101 @@
+.contentContainer{
+    margin-left: 10px;
+}
+
+.addForm{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    width: 100%;
+    max-width: 190px;
+}
+.formInputContainer{
+    max-width: 190px;
+}
+.notesInputContainer{
+    max-width: 190px;
+}
+
+/* Wrapper to hold the dollar sign and input*/
+.currencyWrapper{
+    position: relative;
+    max-width: 190px;
+
+}
+
+/* Dollar sign itself*/
+.currencySymbol{
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    color: #333;
+    pointer-events: none; /* Allows clicking through the symbol to the input */
+}
+/* Add padding so text doesn't overlap the $ initially */
+.currencyWrapper .formInput {
+ padding-left: 25px;
+}
+
+.formInput{
+    padding: 8px;
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.formButtons{
+    display: flex;
+    gap: 10px;
+}
+.submitBtn{
+    padding: 10px 20px;
+
+    border: none;
+    cursor: pointer;
+
+    background-color: #2563eb; /* blue */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: clamp(20px, 2.5vw, 48px);
+    text-decoration: none;
+    font-weight: 600;
+
+    display: inline-block;
+
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.submitBtn:hover{
+    background-color: #1d4ed8;
+
+    transform: scale(1.05);
+}
+.submitBtn:active{
+    transform: scale(0.98);
+}
+.cancelBtn{
+  background-color: #dc2626; /* red */
+  color: white;
+
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: clamp(20px, 2.5vw, 48px);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.cancelBtn:hover{
+  background-color: #b91c1c;
+
+  transform: scale(1.05);
+}
+.cancelBtn:active{
+  transform: scale(0.98);
+}

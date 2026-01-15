@@ -22,6 +22,8 @@
 
     /* Creating a border */
     border-bottom: 2px solid dimgrey;
+
+    font-family: sans-serif
 }
 
 .headerLogoContainer {
@@ -75,6 +77,8 @@
     margin-left: 5px;
     margin-right: 5px;
     font-size: clamp(14px, 3vw, 20px); /* Shrinks text as window gets smaller */
+
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .rightSection{
@@ -101,15 +105,33 @@
 
 /**/
 /**/
-/* css for when buttons/images are hovered over */
-.doordash-logo, .headerNavButton, .externalImageIcon {
-    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease;
+/* css for when header buttons/images are hovered over */
+.doordash-logo, .externalImageIcon {
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease, filter 0.2s ease;
 }
 
-.doordash-logo:hover, .headerNavButton:hover, .externalImageIcon:hover {
+.externalImageIcon:hover {
     transform: scale(1.2);
     margin-left: 10px;
     margin-right: 10px;
+
+    filter: grayscale(30%);
+}
+.doordash-logo:hover{
+    transform: scale(1.2);
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.headerNavButton:hover{
+    transform: scale(1.2);
+    margin-left: 10px;
+    margin-right: 10px;
+
+    background-color: #b7b7b7;
+    border-color: #8f8e8e;
+}
+.headerNavButton:active{
+    transform: scale(0.98);
 }
 
 
@@ -118,8 +140,11 @@
 /**/
 /* Main body for desktop */
 .mainBody {
-    margin-top: 100px;
-    margin-left: 10px;
+    margin-top: 70px;
+    margin-left: 0;
+
+    font-family: sans-serif;
+    flex: 1;
 }
 
 /**/
@@ -128,6 +153,9 @@
 body{
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 
@@ -136,9 +164,6 @@ body{
 /**/
 /* Footer for desktop */
 .footer{
-    position: absolute;
-    bottom: 0;
-    left: 0;
 
     width: 100%;
     margin-top: 50px;
@@ -151,6 +176,7 @@ body{
 
     background-color: #333333;
     color: #e7e7e7;
+    font-family: sans-serif
 }
 
 /* Top Section of the footer */

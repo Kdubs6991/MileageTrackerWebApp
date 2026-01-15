@@ -2,37 +2,45 @@
 
 {% block title %}Add Entry — Mileage Tracker{% endblock %}
 
+{% block stylesheet %}
+     <!-- Reuse the edit page CSS for consistent form styling -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/add-css/addDesktop.css') }}" media="screen and (min-width: 543px)">
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/add-css/addMobile.css') }}" media="screen and (max-width: 542px)">
+ {% endblock %}
+
 {% block content %}
 
-<section>
-    <h2>Add Entry</h2>
+<div class="contentContainer">
+    <h1>Add Entry</h1>
 
-    <form method="post">
-        <!-- Each label in here becomes a key we can read in Flask later. -->
-        <div>
-            <label>Date:</label>
-            <input type="date" name="date"><br><br>
+    <form method="post" class="addForm">
+        <div class="formInputContainer">
+            <label for="date">Week of (Select any day)</label><br>
+            <input type="date" name="date" id="date" required class="formInput" value="{{ today }}">
         </div>
 
-        <div>
-            <label>Miles:</label>
-            <input type="number" step="0.01" name="miles"><br><br>
+        <div class="formInputContainer">
+            <label for="miles">Miles</label><br>
+            <input type="number" name="miles" id="miles" required class="formInput">
         </div>
 
-        <div>
-            <label>Earnings ($):</label>
-            <input type="number" step="0.01" name="earnings"><br><br>
+        <div class="formInputContainer">
+            <label for="earnings">Earnings</label><br>
+            <div class="currencyWrapper">
+                <input type="number" name="earnings" id="earnings" required class="formInput" placeholder=" ">
+                <span class="currencySymbol">$</span>
+            </div>
         </div>
 
-        <div>
-            <label>Notes:</label>
-            <input type="text" name="notes"><br><br>
+        <div class="formInputContainer notesInputContainer">
+            <label for="notes">Notes</label><br>
+            <textarea name="notes" id="notes" rows="3" class="formInput"></textarea>
         </div>
 
-        <div>
-            <button type="submit">Save</button>
-            <a href="/">Cancel</a>
+        <div class="formButtons">
+            <button type="submit" class="submitBtn">Save</button>
+            <a href="{{ url_for('home') }}" class="cancelBtn">Cancel</a>
         </div>
     </form>
-</section>
+</div>
 {% endblock %}

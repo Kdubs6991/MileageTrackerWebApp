@@ -9,8 +9,11 @@
         <title>{% block title%}Milage Tracker{% endblock %}</title>
 
         <!-- Links to all the stylesheets -->
-        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/baseMobile.css') }}" media="screen and (max-width: 542px)">
-        <link rel="stylesheet" href="{{ url_for('static', filename='index-css/baseDesktop.css') }}" media="screen and (min-width: 543px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/base-css/baseMobile.css') }}" media="screen and (max-width: 542px)">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/base-css/baseDesktop.css') }}" media="screen and (min-width: 543px)">
+
+        <!-- Allow child pages to inject their own CSS stylesheets here -->
+        {% block stylesheet %}{% endblock %}
 
         <style>
              /* Ensure the mobile menu is hidden on desktop */
@@ -60,15 +63,15 @@
                 <a href="{{ url_for('about') }}">About</a>
 
                 <div class="mobileExternalLinks">
-                     <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank">
+                     <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank" class="mobileExternalLinkContainer">
                          <img class="MobileExternalImageIcon" src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon">
                          <span>Google Sheets</span>
                      </a>
-                     <a href="https://linktr.ee/kaloob._" target="_blank">
+                     <a href="https://linktr.ee/kaloob._" target="_blank" class="mobileExternalLinkContainer">
                          <img class="MobileExternalImageIcon" src="/static/images/linkTreeIcon.png" alt="Link Tree Icon">
                          <span>Link Tree</span>
                      </a>
-                     <a href="https://github.com/Kdubs6991" target="_blank">
+                     <a href="https://github.com/Kdubs6991" target="_blank" class="mobileExternalLinkContainer">
                          <img class="MobileExternalImageIcon" src="/static/images/gitHubIcon.png" alt="Git Hub Icon">
                          <span>Git Hub</span>
                      </a>
