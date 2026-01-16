@@ -1,4 +1,5 @@
 {% extends "layouts/base.html" %}
+<!-- This tells Jinja to use 'base.html' as the skeleton and fill in the blocks bellow. -->
 
 {% block title %}Home — Mileage Tracker{% endblock %}
 {% block stylesheet %}
@@ -13,6 +14,7 @@
         <h1>2026 Delivery Driving Mileage Tracker</h1>
 </div>
 <div class="contentContainer">
+    <!-- The statsWrapper allows the boxes to scroll horizontally on small screens -->
     <div class="statsWrapper">
         <!-- Summary Stats Box (table data combined here) -->
         <div class="summaryStatsContainer">
@@ -35,10 +37,13 @@
         </div>
     </div>
 
+    <!-- Check if there are any entries in the database list -->
     {% if entries|length == 0 %}
         <p>No entries yet. Click <a href="{{ url_for('add') }}" style="font-weight: bold;">Add entry</a> to create one.</p>
     {% else %}
+    <!-- If entries exist, show the count and the table -->
     <p class="entriesCount">Entries count: {{ entries|length }}</p>
+    <!-- tableWrapper handles horizontal scrolling if the table gets too wide -->
     <div class="tableWrapper">
         <table class="mileageTable">
             <thead>
@@ -54,8 +59,10 @@
             </tr>
             </thead>
             <tbody>
+            <!-- Loop through each dictionary in the 'entries' list passed from app.py -->
                 {% for entry in entries %}
                 <tr>
+                    <!-- Display the calculated/formatted values -->
                     <td>{{ entry["week_num"] }}</td>
                     <td>{{ entry["date"] }}</td>
                     <td>${{ entry["earnings"] }}</td>
@@ -65,7 +72,10 @@
                     <td>{{ entry["notes"] }}</td>
                     <td>
                         <div class="actionsTableCell">
+                            <!-- Edit is a simple link to the edit route -->
                             <a href="{{ url_for('edit', id=entry['id']) }}" class="editBtn">Edit</a>
+                            <!-- Delete must be a FORM with method="POST" for security.
+                                 We use onsubmit to show a confirmation popup before sending. -->
                             <form action="{{ url_for('delete', id=entry['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this entry?');">
                              <button type="submit" class="deleteBtn">Delete</button>
                             </form>

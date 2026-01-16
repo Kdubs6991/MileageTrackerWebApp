@@ -1,4 +1,6 @@
 {% extends "layouts/base.html" %}
+<!-- This tells Jinja to use 'base.html' as the skeleton and fill in the blocks bellow. -->
+
 
 {% block title %}Edit Entry - Mileage Tracker{% endblock %}
 
@@ -12,20 +14,24 @@
 <div class="contentContainer">
     <h1>Edit Entry</h1>
 
+    <!-- The form uses method="post" to send data to the server. -->
     <form method="post" class="editForm">
         <div class="formInputContainer">
             <label for="date">Week of (Select any day)</label><br>
+            <!-- value="{{ entry['date'] }}" pre-fills the input with the date from the database -->
             <input type="date" name="date" id="date" value="{{ entry['date'] }}" class="formInput">
         </div>
 
         <div class="formInputContainer">
             <label for="miles">Miles</label><br>
+            <!-- step="0.01" allows for decimal inputs like 10.55 -->
             <input type="number" step="0.01" name="miles" id="miles" value="{{ entry['miles'] }}" class="formInput">
         </div>
 
         <div class="formInputContainer">
             <label for="earnings">Earnings</label><br>
             <div class="currencyWrapper">
+                <!-- The currencyWrapper puts a '$' symbol inside the input box visually -->
                 <input type="number" step="0.01" name="earnings" id="earnings" required class="formInput" placeholder=" " value="{{ entry['earnings'] }}">
                 <span class="currencySymbol">$</span>
             </div>
@@ -34,16 +40,18 @@
 
         <div class="formInputContainer notesInputContainer">
             <label for="notes">Notes</label><br>
+            <!-- Textareas don't use value="", the text goes between the opening and closing tags -->
             <textarea name="notes" id="notes" rows="3" class="formInput">{{ entry['notes'] }}</textarea>
         </div>
 
         <div class="formButtons">
             <button type="submit" class="submitBtn">Save Changes</button>
             <a href="{{ url_for('home') }}" class="cancelBtn">Cancel</a>
+            <!-- formaction="..." overrides the form's default action.
+                 This allows this specific button to trigger the 'delete route instead of 'edit'. -->
             <button type="submit" class="deleteBtn" formaction="{{ url_for('delete', id=entry['id']) }}" onclick="return confirm('Are you sure you want to delete this entry?');">Delete</button>
         </div>
 
     </form>
 </div>
-
 {% endblock %}

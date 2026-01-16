@@ -1,5 +1,5 @@
 <!-- Base.html is a share template (called a layout in
- an MVC project, and it holds the HTML for shared things
+ an MVC project), and it holds the HTML for shared things
  such as the header, and footer, and more. -->
 
 <!DOCTYPE html>
@@ -8,11 +8,13 @@
         <meta charset="utf-8">
         <title>{% block title%}Milage Tracker{% endblock %}</title>
 
-        <!-- Links to all the stylesheets -->
+        <!-- Responsive Css Loading:
+             - Loads 'baseMobile.css' ONLY if screen width is 542px or less.
+             - Loads 'baseDesktop.css' ONLY if screen width is 543px or more. -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/base-css/baseMobile.css') }}" media="screen and (max-width: 542px)">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/base-css/baseDesktop.css') }}" media="screen and (min-width: 543px)">
 
-        <!-- Allow child pages to inject their own CSS stylesheets here -->
+        <!-- '% block stylesheet %' allows child pages (like home.html) to inject their own specific CSS files here -->
         {% block stylesheet %}{% endblock %}
 
         <style>
@@ -80,6 +82,8 @@
         </div>
 
         <main class="mainBody">
+            <!-- '% block content %' is the placeholder where the unique content
+                 from pages like home.html, add.html, etc., will be inserted -->
             {% block content %}{% endblock %}
         </main>
 

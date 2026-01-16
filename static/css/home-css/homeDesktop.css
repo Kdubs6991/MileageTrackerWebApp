@@ -37,6 +37,7 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 5px;
+    /* flex: 1 ensures all 4 boxes take up equal width */
     flex: 1;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -65,6 +66,7 @@
     max-width: 1000px;
     margin: 0 auto;
 
+    /* border-collapse ensures borders are shared between cells, removing double lines */
     border-collapse: collapse;
     box-shadow: 0 0 20px rgba(0,0,0,0.15);
     background-color: #fff;
@@ -74,6 +76,7 @@
     color: #ffffff;
     text-align: left;
 }
+/* Styling for both header cells (th) and date cells (td) */
 .mileageTable th, .mileageTable td {
      padding: 12px 15px;
      border-bottom: 1px solid #dddddd;

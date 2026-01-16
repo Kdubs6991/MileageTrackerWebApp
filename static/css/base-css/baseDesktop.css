@@ -144,17 +144,22 @@
     margin-left: 0;
 
     font-family: sans-serif;
+    /* flex: 1 makes this section grow to fill any empty space on the screen,
+       pushing the footer to the bottom. */
     flex: 1;
 }
 
 /**/
 /**/
 /* default browser margin's and padding removed */
+/* This setup creates a "Sticky Footer" layout using Flexbox */
 body{
     margin: 0;
     padding: 0;
+    /* min-height: 100vh ensures the body is at least as tall as the screen */
     min-height: 100vh;
     display: flex;
+    /* Stacks elements vertically: header --> Main --> Footer */
     flex-direction: column;
 }
 

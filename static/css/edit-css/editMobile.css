@@ -47,6 +47,7 @@
 
 
 .formButtons{
+    /* Stack buttons vertically on mobile for easier tapping */
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -64,7 +65,8 @@
     font-weight: 600;
 
     box-sizing: border-box;
-    width: 100%
+    /* width: 100% makes the button span the full screen width */
+    width: 100%;
     display: inline-block;
 
     transition: background-color 0.2s ease, transform 0.2s ease;
