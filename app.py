@@ -176,11 +176,11 @@ def add():
                             miles += trip_miles
                         except ValueError:
                             continue
-        # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
-        if miles > 0:
-            flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
-        else:
-            flash("CSV processed, but no trips were found for this specific week.", "warning")
+            # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
+            if miles > 0:
+                flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
+            else:
+                flash("CSV processed, but no trips were found for this specific week.", "warning")
 
         # 4. Fallback: If no file was uploaded, use the manual input box.
         if not file_processed:
