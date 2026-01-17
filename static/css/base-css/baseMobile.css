@@ -186,6 +186,39 @@
 
 /**/
 /**/
+/* Flash Messages Styling */
+.flashMessagesContainer {
+    padding-top: 20px;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto 20px auto; /* Center it and add space below */
+}
+.flashMessage {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-family: sans-serif;
+    font-weight: 600;
+}
+/* Different colors for different categories */
+.flashMessage.success {
+    background-color: #d1fae5; /* Light Green */
+    color: #065f46;            /* Dark Green Text */
+    border: 1px solid #34d399;
+}
+.flashMessage.warning {
+    background-color: #fee2e2; /* Light Yellow */
+    color: #92400e;            /* Dark Orange Text */
+    border: 1px solid #f59e0b;
+}
+.flashMessage.error {
+    background-color: #fee2e2; /* Light Red */
+    color: #991b1b;            /* Dark Red Text */
+    border: 1px solid #f87171;
+}
+
+/**/
+/**/
 /* default browser margin's and padding removed */
 body{
     margin: 0;

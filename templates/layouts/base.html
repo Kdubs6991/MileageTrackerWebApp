@@ -82,6 +82,19 @@
         </div>
 
         <main class="mainBody">
+            <!-- Flash Messages Section -->
+            <!-- This loops through any messages sent from app.py and displays them -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flashMessagesContainer">
+                        {% for category, message in messages %}
+                            <div class="flashMessage {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <!-- '% block content %' is the placeholder where the unique content
                  from pages like home.html, add.html, etc., will be inserted -->
             {% block content %}{% endblock %}

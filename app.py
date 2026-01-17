@@ -2,7 +2,8 @@
 # render_template: renders HTML files.
 # request: handles incoming data (forms, files).
 # redirect/url_for: moves users to different pages.
-from flask import Flask, render_template, request, redirect, url_for
+# flash: stores temporary messages (like success/error notifications) to show on the next page load.
+from flask import Flask, render_template, request, redirect, url_for, flash
 
 # Imports for handling dates and time calculations (used for week logic).
 from datetime import datetime, timedelta, date
@@ -24,6 +25,9 @@ from pathlib import Path
 # Creates the Flask application instance.
 # Passing __name__ tells Flask where to look for templates and static files.
 app = Flask(__name__)
+# Secret key is required for session data (like Flash messages).
+# In a real production app, this should be a long random string hidden in an enviroment variable.
+app.secret_key = "dev_key_for_mileage_tracker"
 
 # Defines the full path to the database file.
 # Path(__file__) gets the location of this script (app.py).
@@ -172,12 +176,18 @@ def add():
                             miles += trip_miles
                         except ValueError:
                             continue
+        # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
+        if miles > 0:
+            flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
+        else:
+            flash("CSV processed, but no trips were found for this specific week.", "warning")
 
         # 4. Fallback: If no file was uploaded, use the manual input box.
         if not file_processed:
             manual_miles = request.form.get("miles")
             if manual_miles:
                 miles = float(manual_miles)
+                flash("Entry added successfully!", "success")
 
         # 5. Get the remaining form data.
         # Convert earnings to float, defaulting to 0.0 if empty.
@@ -255,6 +265,7 @@ def edit(id):
         conn.close()
 
         # Redirect back to home page.
+        flash("Entry updated successfully!", "success")
         return redirect(url_for("home"))
 
     # 5. Handle Page Load (GET).
@@ -305,6 +316,7 @@ def delete(id):
     conn.close()
 
     #4. Redirect back to the home page.
+    flash("Entry deleted.", "error")
     return redirect(url_for("home"))
 
 #---------------------------------------------------------
