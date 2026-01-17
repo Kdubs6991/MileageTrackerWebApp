@@ -4,6 +4,8 @@
 # redirect/url_for: moves users to different pages.
 # flash: stores temporary messages (like success/error notifications) to show on the next page load.
 from flask import Flask, render_template, request, redirect, url_for, flash
+import os
+from dotenv import load_dotenv
 
 # Imports for handling dates and time calculations (used for week logic).
 from datetime import datetime, timedelta, date
@@ -22,12 +24,14 @@ from pathlib import Path
 
 #-----------------------------------------------------------------------
 
+# Load environment variables form the .env file (if it exists)
+
 # Creates the Flask application instance.
 # Passing __name__ tells Flask where to look for templates and static files.
 app = Flask(__name__)
 # Secret key is required for session data (like Flash messages).
 # In a real production app, this should be a long random string hidden in an enviroment variable.
-app.secret_key = "dev_key_for_mileage_tracker"
+app.secret_key = os.environ.get("SECRET_KEY", "dev_key_for_mileage_tracker")
 
 # Defines the full path to the database file.
 # Path(__file__) gets the location of this script (app.py).
