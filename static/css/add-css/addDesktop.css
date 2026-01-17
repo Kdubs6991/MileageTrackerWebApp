@@ -9,10 +9,10 @@
     gap: 15px;
 
     width: 100%;
-    max-width: 190px;
+    max-width: 400px;
 }
 .formInputContainer{
-    max-width: 190px;
+    max-width: 100%;
 }
 .notesInputContainer{
     max-width: 190px;
@@ -42,9 +42,14 @@
  padding-left: 25px;
 }
 
+.fileInputContainer{
+    margin-top: 2px;
+    margin-bottom: 10px;
+}
+
 .formInput{
     padding: 8px;
-    width: 100%;
+    width: 190px;
 
     /* Ensures padding doesn't add to the total width, keeping it inside the 100% */
     box-sizing: border-box;

@@ -170,7 +170,9 @@ body{
 /* Footer for desktop */
 .footer{
 
-    width: 100%;
+    /* min-width and align-self allow the footer to stretch if content is wider than the screen */
+    min-width: 100%;
+    align-self: flex-start;
     margin-top: 50px;
 
     display: flex;

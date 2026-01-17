@@ -1,0 +1,31 @@
+.contentContainer {
+    /* baseMobile.css adds 10px margin-left to mainBody,
+       so we just add margin-right here to keep it balanced. */
+    margin-right: 10px;
+    font-family: sans-serif;
+}
+
+.aboutSection {
+    line-height: 1.5;
+    color: #333;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 22px;
+    margin-top: 25px;
+    border-bottom: 1px solid #eee;
+    color: #2563eb;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+li {
+     margin-bottom: 10px;
+}

@@ -1,17 +1,49 @@
 {% extends "layouts/base.html" %}
 <!-- This tells Jinja to use 'base.html' as the skeleton and fill in the blocks bellow. -->
 
-
 {% block title %}About — Mileage Tracker{% endblock %}
 
-{% block stylesheet %} {% endblock%}
+{% block stylesheet %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about-css/aboutDesktop.css') }}" media="screen and (min-width: 543px)">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/about-css/aboutMobile.css') }}" media="screen and (max-width: 542px)">
+{% endblock%}
 
 {% block content %}
 
 <!-- This is a static page. It doesn't receive data from app.py,
      it just displays hardcoded HTML content -->
-<section>
-    <h1>About Page</h1>
-</section>
+<div class="contentContainer">
+    <h1>About The Mileage Tracker Project</h1>
+
+    <div class="aboutSection">
+        <p>
+            This application is designed to help delivery drivers (DoorDash, UberEats etc.) track their weekly mileage and earnings efficiently.
+            By keeping a consistent log, you can  ensure you are maximizing your tax deductions at the end of the year.
+        </p>
+
+        <h2>Key Features</h2>
+        <ul>
+            <li><strong>Weekly Logging:</strong> Track your miles and earnings week by week.</li>
+            <li><strong>Smart Date Snapping:</strong> Select any day, and the app automatically assigns it to the correct week (Monday-Sunday).</li>
+            <li><strong>Tax Estimates:</strong> Automatically calculates your estimated tax deduction based on the 2025 IRS Standard Mileage Rate ($0.70/mile).</li>
+            <li><strong>Set Aside Calculator:</strong> Helps you budget for taxes by calculating 25% of your earnings.</li>
+            <li><strong>Stride Import:</strong> Upload your CSV tax reports from Stride to automatically fill in  your mileage.</li>
+        </ul>
+
+        <h2>How It Works</h2>
+        <p>
+            Simply go to the <strong>Add</strong> page to enter your data. You can manually type in your miles or upload a CSV file.
+            The <strong>Home</strong> page gives you a dashboard view of your total earnings, miles, and potential tax deductions for the year.
+        </p>
+
+        <h2>Technologies Used</h2>
+         <p>This project was built to replace a manual spreadsheet workflow, utilizing:</p>
+         <ul>
+             <li><strong>Backend:</strong> Python, Flask, SQLite</li>
+             <li><strong>Frontend:</strong> HTML5, CSS3, Jinja2 Templating</li>
+             <li><strong>Data Processing:</strong> Python CSV & IO Libraries</li>
+         </ul>
+    </div>
+</div>
 
 {% endblock %}
