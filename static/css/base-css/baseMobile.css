@@ -55,10 +55,10 @@
     /* Hide the regular nav buttons on mobile */
     display: none;
 }
-.rightSection {
-     /* Hide the external links on mobile (they are in the menu now) */
-     display: none;
- }
+.userAuthSection {
+    /* Hide the desktop auth buttons on mobile (they are in the menu now) */
+    display: none;
+}
 
 /* The individual lines of the hamburger icon */
 .hamburgerMenu{
@@ -124,39 +124,14 @@
     text-decoration: none;
     color: #dd8b8b;
 }
-.mobileExternalLinks{
-    margin-top: 30px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-/* Override the default block display to align icon and text side-by-side */
- .mobileExternalLinks a {
-     display: flex;
-     align-items: center;
- }
- /* Style for the new text labels */
- .mobileExternalLinks span {
-     margin-left: 15px;
-     font-size: clamp(16px, 4vw, 20px);
- }
-.MobileExternalImageIcon{
-    /* Force consistent size */
-    height: auto;
-    width: clamp(30px, 8vw, 40px); /* Shrinks icons as screen gets smaller */
-    object-fit: contain;
-}
-.mobileExternalLinkContainer{
-    filter: grayscale(100%);
-
-    transition: filter 0.2s ease;
+.mobileNavLinks{
+    padding-bottom: 15px;
 }
 
 /**/
 /**/
 /* css for when buttons/images are hovered over */
-.doordash-logo, .mobileNavContent a, .mobileExternalLinkContainer, .closeBtn {
+.doordash-logo, .mobileNavContent a, .closeBtn {
     transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease;
 }
 .doordash-logo:hover, .mobileNavContent a:hover, .closeBtn:hover {
@@ -164,13 +139,7 @@
     margin-left: 5px;
     margin-right: 5px;
 }
-.mobileExternalLinkContainer:hover{
-    transform: scale(1.1);
-    margin-left: 5px;
-    margin-right: 5px;
 
-    filter: grayscale(30%);
-}
 
 /**/
 /**/

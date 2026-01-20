@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Login - Mileage Tracker{% endblock %}
+
+{% block stylesheet %}
+    <!-- Reuse the add/edit CSS for consistent form styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account-css/accountDesktop.css') }}" media="screen and (min-width: 543px)">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/account-css/accountMobile.css') }}" media="screen and (max-width: 542px)">
+{% endblock %}
+
+
+{% block content %}
+    <div class="contentContainer">
+        <h1>My Account</h1>
+
+        <!-- Profile Information -->
+        <div class="accountCard">
+            <div class="detailRow">
+                <span class="detailLabel">Username:</span>
+                <span class="detailValue">{{ current_user.username }}</span>
+            </div>
+
+            <div class="detailRow">
+                <span class="detailLabel">Email:</span>
+                <span class="detailValue">{{ current_user.email }}</span>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div class="actionSection">
+            <h3>Data & Privacy</h3>
+
+            <a href="{{ url_for('export') }}" class="exportBtn">Export Data to CSV</a>
+
+            <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure? This will permanently delete your account and all mileage entries. This CANNOT be undone.');">
+                <button type="submit" class="deleteBtn">Delete Account</button>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}

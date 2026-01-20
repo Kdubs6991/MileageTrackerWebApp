@@ -3,9 +3,24 @@
 # request: handles incoming data (forms, files).
 # redirect/url_for: moves users to different pages.
 # flash: stores temporary messages (like success/error notifications) to show on the next page load.
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response
+
+# os: Used to access operating system functionality, specifically environment variables.
 import os
+# dotenv: Loads environment variables from a .env file into os.environ.
 from dotenv import load_dotenv
+
+# Flask-Login: Manages user sessions and authentication.
+# LoginManager: The main class that handles the login process.
+# login_user/logout_user: Functions to log a user in or out.
+# login_required: Decorator to protect routes (ensure user is logged in).
+# current_user: Proxy for the currently logged-in user.
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+
+# Werkzeug Security: Handles password hashing.
+# generate_password_hash: Encrypts a password before saving to the database.
+# check_password_hash: Checks a login password against the stored hash.
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Imports for handling dates and time calculations (used for week logic).
 from datetime import datetime, timedelta, date
@@ -16,6 +31,9 @@ import io
 
 # Import the custom calculation logic from utils.py.
 from utils import calculate_stats
+
+# Import the User model from our new models.py file
+from models import User
 
 # Import for database interation.
 import sqlite3
@@ -30,8 +48,17 @@ from pathlib import Path
 # Passing __name__ tells Flask where to look for templates and static files.
 app = Flask(__name__)
 # Secret key is required for session data (like Flash messages).
-# In a real production app, this should be a long random string hidden in an enviroment variable.
+# In a real production app, this should be a long random string hidden in an environment variable.
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key_for_mileage_tracker")
+
+# -------------------------------
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' #Redirects users here if they try to access a protected page
+
+# -------------------------------
 
 # Defines the full path to the database file.
 # Path(__file__) gets the location of this script (app.py).
@@ -47,12 +74,28 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+@login_manager.user_loader
+def load_user(user_id):
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    conn.close()
+    if user:
+        return User(user['id'], user['username'], user['email'], user['password_hash'])
+    return None
+
 
 # Initializes the database by creating the 'entries' table if it doesn't exist.
 # This ensures the app has a place to store data when it first runs.
 #
 # Table Schema:
+#   Users Table:
+#   - id: Unique User ID
+#   - username: The login name
+#   - password_hash: The encrypted password
+#
+#   Entries Table:
 #   - id: Unique identifier for each row (Primary Key).
+#   - user_id: Links the entry to a specific user.
 #   - date: The Monday date of the week (stored as TEXT 'YYYY-MM-DD').
 #   - miles: Total miles driven (stored as REAL/Float).
 #   - earnings: Total money made (stored as REAL/Float).
@@ -60,12 +103,22 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
+        );
+    """)
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
         date TEXT NOT NULL,
         miles REAL NOT NULL,
         earnings REAL NOT NULL,
-        notes TEXT
+        notes TEXT,
+        FOREIGN KEY (user_id) REFERENCES users (id)
         );
     """)
     # Commits the changes to the database (saves whatever was done to it).
@@ -82,13 +135,15 @@ def init_db():
 # @app.route decorator: Tells Flask what URL should trigger the function below it.
 # The string inside ("/") is the 'rule'. "/" represents the root or homepage.
 @app.route("/")
+@login_required
 def home():
     # 1. Connect to the database
     conn = get_db_connection()
-    # 2. Fetch all entries
-    # "SELECT * FROM entries" gets every column.
+
+    # 2. Fetch all entries for the CURRENT USER only
+    # 'WHERE user_id = ?' ensures users only see their own data.
     # "ORDER BY date ASC" list the entries starting from week #1 and going forward.
-    rows = conn.execute("SELECT * FROM entries ORDER BY date ASC").fetchall()
+    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id,)).fetchall()
 
     # 3. Close the connection immediately after fetching data.
     conn.close()
@@ -118,6 +173,7 @@ def home():
 #       * GET: Used when the user just wants to see the page.
 #       * POST: Used when the user submits the form to save data.
 @app.route("/add", methods=("GET", "POST"))
+@login_required
 def add():
     # Check if the form was submitted (POST request)
     if request.method == "POST":
@@ -180,11 +236,11 @@ def add():
                             miles += trip_miles
                         except ValueError:
                             continue
-            # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
-            if miles > 0:
-                flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
-            else:
-                flash("CSV processed, but no trips were found for this specific week.", "warning")
+                # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
+                if miles > 0:
+                    flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
+                else:
+                    flash("CSV processed, but no trips were found for this specific week.", "warning")
 
         # 4. Fallback: If no file was uploaded, use the manual input box.
         if not file_processed:
@@ -203,8 +259,8 @@ def add():
         # Save to the database.
         conn = get_db_connection()
         conn.execute(
-            "INSERT INTO entries (date, miles, earnings, notes) VALUES (?, ?, ?, ?)",
-            (date_to_save, miles, earnings, notes),
+            "INSERT INTO entries (date, miles, earnings, notes, user_id) VALUES (?, ?, ?, ?, ?)",
+            (date_to_save, miles, earnings, notes, current_user.id),
         )
         conn.commit()
         conn.close()
@@ -225,14 +281,19 @@ def add():
 #   - <int:id> is a dynamic variable. If you go to '/edit/5', Flask passes 5
 #     as the 'id' argument to the edit(id) function below.
 @app.route("/edit/<int:id>", methods=("GET", "POST"))
+@login_required
 def edit(id):
     # 1. Connect to the database.
     conn = get_db_connection()
 
     # 2. Fetch the existing entry.
     # We need the current data to pre-fill the form so the user sees what they are editing.
-    # 'WHERE id =?' ensures we only get the one specific row matching the URL ID.
-    entry = conn.execute('SELECT * FROM entries WHERE id = ?', (id,)).fetchone()
+    # We also check 'AND user_id = ?' to ensure users can't edit someone else's data.
+    entry = conn.execute('SELECT * FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id)).fetchone()
+
+    if entry is None:
+        flash("Entry not found or access denied.", "error")
+        return redirect(url_for("home"))
 
     # 3. Handle the form submission (POST).
     # If the user made changes and clicked "Save Changes".
@@ -260,8 +321,8 @@ def edit(id):
         # "UPDATE entries SET ..." modifies the existing row.
         # We use the 'id' to make sure we don't overwrite the wrong entry.
         conn.execute(
-            "UPDATE entries SET date = ?, miles = ?, earnings = ?, notes = ? WHERE id = ?",
-            (date_to_save, miles, earnings, notes, id),
+            "UPDATE entries SET date = ?, miles = ?, earnings = ?, notes = ? WHERE id = ? AND user_id = ?",
+            (date_to_save, miles, earnings, notes, id, current_user.id),
         )
 
         # Save the changes and close connection.
@@ -306,14 +367,15 @@ def edit(id):
 #   - methods=("POST",): We ONLY allow POST requests here.
 #     This prevents accidental deletions via simple link clicks (GET requests).
 @app.route("/delete/<int:id>", methods=("POST",))
+@login_required
 def delete(id):
     # 1. Connect to the database.
     conn = get_db_connection()
 
     # 2. Execute the Delete Command.
-    # 'DELETE FROM entries WHERE id = ?' removes the row with the matching ID.
+    # 'DELETE FROM entries WHERE id = ?' removes the row with the matching ID and User ID.
     # The (id,) tuple provides the value for the '?' placeholder.
-    conn.execute('DELETE FROM entries WHERE id = ?', (id,))
+    conn.execute('DELETE FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id))
 
     # 3. Save changes and close the connection
     conn.commit()
@@ -331,6 +393,141 @@ def delete(id):
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+#-----------------------------------------------------------------------
+
+#
+# App route for the user's account information
+#
+@app.route("/account")
+def account():
+    return render_template("auth/account.html")
+
+#---------------------------------------------------------
+
+#
+# App route for Deleting the User Account
+#
+@app.route("/delete_account", methods=("POST",))
+@login_required
+def delete_account():
+    conn = get_db_connection()
+    # Delete all entries belonging to the user first
+    conn.execute("DELETE FROM entries WHERE user_id = ?", (current_user.id,))
+    # Then delete the user itself
+    conn.execute("DELETE FROM users WHERE id = ?", (current_user.id,))
+    conn.commit()
+    conn.close()
+
+    logout_user()
+    flash('Your account and all data have been deleted', 'success')
+    return redirect(url_for('login'))
+
+
+#---------------------------------------------------------
+#
+# Authentication Routes
+#
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # If the user submitted the registration form
+    if request.method == 'POST':
+        email = request.form['email']
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        # Check if user already exists
+        user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, email)).fetchone()
+
+        if user:
+            flash('Username or email already exists', 'error')
+            conn.close()
+            return redirect(url_for('register'))
+
+        # Security: Hash the password so we never store plain text passwords.
+        # If the database is hacked, the attacker only sees hashes, not real passwords.
+        hashed_pw = generate_password_hash(password)
+
+        # Save the new user
+        conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', (username, email, hashed_pw))
+        conn.commit()
+        conn.close()
+
+        flash('Registration successful! Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('auth/register.html')
+
+#---------------------------------------------------------
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    # If the user submitted the login form
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        conn = get_db_connection()
+        # Fetch the user record by username OR email
+        # We pass 'username' twice because we are checking it against two different columns.
+        user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, username)).fetchone()
+        conn.close()
+
+        # Verify user exists AND the password matches the stored hash.
+        # check_password_hash handles the decryption/comparison securely.
+        if user and check_password_hash(user['password_hash'], password):
+            # Create a User object and log them in using Flask-Login
+            user_obj = User(user['id'], user['username'], user['email'], user['password_hash'])
+            login_user(user_obj)
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid username or password.', 'error')
+
+    return render_template('auth/login.html')
+
+#---------------------------------------------------------
+
+@app.route('/logout')
+@login_required
+def logout():
+    # Clears the user session and logs them out
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))
+
+#---------------------------------------------------------
+
+#
+# App route for Exporting Data (CSV)
+#
+@app.route("/export")
+@login_required
+def export():
+    # 1. Fetch all data for the current user
+    conn = get_db_connection()
+    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id)).fetchall()
+    conn.close()
+
+    # 2. Create CSV in memory
+    si = io.StringIO()
+    cw = csv.writer(si)
+    # Write Headers
+    cw.writerow(["Date", "Miles", "Earnings", "Notes"])
+    # Write Data
+    for row in rows:
+        cw.writerow([row["date"], row["miles"], row["earnings"], row["notes"]])
+
+    # 3. Create a response object that acts as a file download
+    output = make_response(si.getvalue())
+    output.headers["Content-Disposition"] = "attatchment; filename=mileage_report.csv"
+    output.headers["Content-type"] = "text/csv"
+    return output
+
+
+
+#-----------------------------------------------------------------------
 
 
 # Checks if this script is being run directly (e.g., 'python app.py').

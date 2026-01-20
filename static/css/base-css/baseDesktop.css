@@ -37,8 +37,8 @@
     justify-content: center;
 
     /* Padding to make the logo inside sit better */
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 /* left side image */
 .doordash-logo{
@@ -47,6 +47,8 @@
     height: auto;
     width: auto;
     max-width: 15vw; /* Ensures logo shrinks if viewport gets very narrow */
+
+    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease, filter 0.2s ease;
 }
 
 .headerNavigationButtonsContainer{
@@ -54,7 +56,7 @@
     /* background color used for development/debugging */
 
     /* Flexbox setup */
-    flex: 3;
+    flex: 2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,42 +83,30 @@
     transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.rightSection{
-    /* background-color: purple; */
-    /* background color used for development/debugging */
 
+.userAuthSection.authLoggedOut{
     /* Flexbox setup */
     display: flex;
-    flex: 1.2;
+    flex: 1;
     align-items: center;
-    justify-content: space-around;
+    justify-content: flex-end;
     min-width: 90px;
 
+    padding-right: 15px;
 }
+.userAuthSection.authLoggedIn {
+    display: flex;
+    flex: 0;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 90px;
 
-.externalImageIcon{
-    /* Force consistent size */
-    height: auto;
-    width: clamp(30px, 4vw, 40px); /* Shrinks icons as window gets smaller */
-    object-fit: contain;
-
-    filter: grayscale(100%);
+    padding-right: 15px;
 }
-
 /**/
 /**/
 /* css for when header buttons/images are hovered over */
-.doordash-logo, .externalImageIcon {
-    transition: transform 0.2s ease, margin-left 0.2s ease, margin-right 0.2s ease, filter 0.2s ease;
-}
 
-.externalImageIcon:hover {
-    transform: scale(1.2);
-    margin-left: 10px;
-    margin-right: 10px;
-
-    filter: grayscale(30%);
-}
 .doordash-logo:hover{
     transform: scale(1.2);
     margin-left: 10px;
@@ -259,6 +249,11 @@ body{
 .footerNavLink{
     color: #b4b4b4;
     text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+.footerNavLink:hover{
+    color: #c8c8c8;
 }
 
 /* This is called a descendant selector, this finds any element with the label 'ul'

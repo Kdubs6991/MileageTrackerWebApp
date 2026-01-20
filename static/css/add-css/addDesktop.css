@@ -112,3 +112,11 @@
 .cancelBtn:active{
   transform: scale(0.98);
 }
+
+
+.bottomAuthText{
+    margin-top: 20px;
+}
+.registerLoginLink{
+    color: #2563eb;
+}

@@ -44,42 +44,54 @@
 
             <!-- Middle section for navigation links -->
             <nav class="headerNavigationButtonsContainer">
-                <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
-                <a class="headerNavButton" href="{{ url_for('add') }}">Add</a>
-                <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
+                {% if current_user.is_authenticated %}
+                    <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
+                    <a class="headerNavButton" href="{{ url_for('add') }}">Add</a>
+                    <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
+                {% else %}
+                    <a class="headerNavButton" href="{{ url_for('home') }}">Home</a>
+                    <a class="headerNavButton" href="{{ url_for('about') }}">About</a>
+                {% endif %}
             </nav>
 
-            <!-- Right section for external links -->
-            <div class="rightSection">
-                <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank"><img class="externalImageIcon" src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon"></a>
-                <a href="https://linktr.ee/kaloob._" target="_blank"><img class="externalImageIcon" src="/static/images/linkTreeIcon.png" alt="Link Tree Icon"></a>
-                <a href="https://github.com/Kdubs6991" target="_blank"><img class="externalImageIcon" src="/static/images/gitHubIcon.png" alt="Git Hub Icon"></a>
-            </div>
+            {% if current_user.is_authenticated %}
+                <div class="userAuthSection authLoggedIn">
+                    <a class=" headerNavButton headerAccountButton" href="{{ url_for('account') }}">Account</a>
+                </div>
+            {% else %}
+                <div class="userAuthSection authLoggedOut">
+                    <a class="headerNavButton headerLoginButton" href="{{ url_for('login') }}">Login</a>
+                    <a class="headerNavButton headerRegisterButton" href="{{ url_for('register') }}">Register</a>
+                </div>
+            {% endif %}
         </header>
 
         <div id="mobileNavOverlay" class="mobileNavOverlay">
             <a href="javascript:void(0)" class="closeBtn" onclick="toggleMenu()">&times;</a>
-            <div class="mobileNavContent">
-                <a href="{{ url_for('home') }}">Home</a>
-                <a href="{{ url_for('add') }}">Add</a>
-                <a href="{{ url_for('about') }}">About</a>
-
-                <div class="mobileExternalLinks">
-                     <a href="https://docs.google.com/spreadsheets/d/1JJBXok8eEQnYHOuvK2PLwrS9O1qeUtEDoQK7ltxREbI/edit?usp=sharing" target="_blank" class="mobileExternalLinkContainer">
-                         <img class="MobileExternalImageIcon" src="/static/images/googleSheetsIcon.png" alt="Google Sheets Icon">
-                         <span>Google Sheets</span>
-                     </a>
-                     <a href="https://linktr.ee/kaloob._" target="_blank" class="mobileExternalLinkContainer">
-                         <img class="MobileExternalImageIcon" src="/static/images/linkTreeIcon.png" alt="Link Tree Icon">
-                         <span>Link Tree</span>
-                     </a>
-                     <a href="https://github.com/Kdubs6991" target="_blank" class="mobileExternalLinkContainer">
-                         <img class="MobileExternalImageIcon" src="/static/images/gitHubIcon.png" alt="Git Hub Icon">
-                         <span>Git Hub</span>
-                     </a>
-                 </div>
+            <div class="mobileNavContent mobileNavLinks">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('home') }}">Home</a>
+                    <a href="{{ url_for('add') }}">Add</a>
+                    <a href="{{ url_for('about') }}">About</a>
+                {% else %}
+                    <a href="{{ url_for('home') }}">Home</a>
+                    <a href="{{ url_for('about') }}">About</a>
+                {% endif %}
             </div>
-        </div>
+
+                {% if current_user.is_authenticated %}
+                    <div class="mobileNavContent">
+                        <a href="{{ url_for('account') }}">Account</a>
+                    </div>
+                {% else %}
+                    <div class="mobileNavContent">
+                        <a href="{{ url_for('login') }}">Login</a>
+                        <a href="{{ url_for('register') }}">Register</a>
+                    </div>
+                {% endif %}
+            </div>
+
+
 
         <main class="mainBody">
             <!-- Flash Messages Section -->
@@ -114,8 +126,22 @@
                         </nav>
                     </div>
                 </div>
-                <div class="footerAccountSection">
-                    <!--Use this section in future for account login and setup -->
+                <div class="footerNavContainer">
+                    <div class="footerNavSection">
+                        <!--Use this section in future for account login and setup -->
+                        <h5>Account</h5>
+                        <nav>
+                            <ul>
+                                {% if current_user.is_authenticated %}
+                                    <li><a class="footerNavLink" href="{{ url_for('account') }}">Account</a></li>
+                                    <li><a class="footerNavLink" href="{{ url_for('logout') }}">Logout</a></li>
+                                {% else %}
+                                    <li><a class="footerNavLink" href="{{ url_for('login') }}">Login</a></li>
+                                    <li><a class="footerNavLink" href="{{ url_for('register') }}">Register</a></li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
             </div>
             <div class="footerBottomSection">

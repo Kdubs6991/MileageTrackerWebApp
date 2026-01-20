@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Login - Mileage Tracker{% endblock %}
+
+{% block stylesheet %}
+    <!-- Reuse the add/edit CSS for consistent form styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add-css/addDesktop.css') }}" media="screen and (min-width: 543px)">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/add-css/addMobile.css') }}" media="screen and (max-width: 542px)">
+{% endblock %}
+
+
+{% block content %}
+    <div class="contentContainer">
+        <h1>Login</h1>
+
+        <form method="post" class="addForm">
+            <!-- Email is required to register, but optional to log in with -->
+            <div class="formInputContainer">
+                <label for="username">Username or Email</label><br>
+                <input type="text" name="username" id="username" required class="formInput">
+            </div>
+
+            <div class="formInputContainer">
+                <label for="password">Password</label><br>
+                <input type="password" name="password" id="password" required class="formInput">
+            </div>
+
+            <div class="formButtons">
+                <button type="submit" class="submitBtn">Login</button>
+            </div>
+
+            <p class="bottomAuthText">Don't have an account? <a href="{{ url_for('register') }}" class="registerLoginLink">Register here</a>.</p>
+        </form>
+    </div>
+{% endblock %}
