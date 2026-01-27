@@ -1,0 +1,137 @@
+.contentContainer {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+
+    width: 90%;
+    max-width: 800px;
+    font-family: sans-serif;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+.accountTitle {
+    margin-bottom: 5px;
+}
+
+/* Profile Card Styling */
+.accountCard {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 30px;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.detailLabel {
+    font-weight: bold;
+    color: #555;
+}
+
+.detailValue {
+    color: #333;
+}
+
+/* Action Buttons Container */
+.actionSection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    width: 100%;
+    max-width: 400px;
+}
+
+.exportBtn {
+    margin-bottom: 40px;
+    padding: 10px 10px;
+    white-space: nowrap;
+    width: 25vw;
+    box-sizing: border-box;
+
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    color: black;
+    font-size: clamp(10px, 2vw, 48px);
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.exportBtn:hover{
+    background-color: #dbffdd;
+    border-color: #9fdca3;
+
+    transform: scale(1.05);
+}
+.exportBtn:active{
+    transform: scale(0.98);
+}
+
+.logoutBtn {
+    padding: 10px 10px;
+    white-space: nowrap;
+    width: 12vw;
+    box-sizing: border-box;
+
+    border: 1px solid #ddd;
+    background-color: #2563eb;
+    color: white;
+    font-size: clamp(10px, 2vw, 48px);
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.logoutBtn:hover{
+    background-color: #1d4ed8;
+
+    transform: scale(1.05);
+}
+.logoutBtn:active{
+    transform: scale(0.98);
+}
+
+.deleteBtn{
+  background-color: #dc2626; /* red */
+  color: white;
+
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: clamp(10px, 2vw, 48px);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.deleteBtn:hover{
+  background-color: #b91c1c;
+
+  transform: scale(1.05);
+}
+.deleteBtn:active{
+  transform: scale(0.98);
+}

@@ -507,7 +507,7 @@ def logout():
 def export():
     # 1. Fetch all data for the current user
     conn = get_db_connection()
-    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id)).fetchall()
+    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id,)).fetchall()
     conn.close()
 
     # 2. Create CSV in memory

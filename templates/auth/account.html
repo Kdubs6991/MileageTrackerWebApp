@@ -13,6 +13,7 @@
     <div class="contentContainer">
         <h1>My Account</h1>
 
+        <h3 class="accountTitle">Account Information</h3>
         <!-- Profile Information -->
         <div class="accountCard">
             <div class="detailRow">
@@ -20,7 +21,7 @@
                 <span class="detailValue">{{ current_user.username }}</span>
             </div>
 
-            <div class="detailRow">
+            <div class="detailRow" style="border: none; margin-bottom: 0;">
                 <span class="detailLabel">Email:</span>
                 <span class="detailValue">{{ current_user.email }}</span>
             </div>
@@ -28,14 +29,14 @@
 
         <!-- Account Actions -->
         <div class="actionSection">
-            <h3>Data & Privacy</h3>
+            <h3 class="accountTitle">Data & Privacy</h3>
 
             <a href="{{ url_for('export') }}" class="exportBtn">Export Data to CSV</a>
 
+            <a class="logoutBtn" href="{{ url_for('logout') }}">Logout</a>
             <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure? This will permanently delete your account and all mileage entries. This CANNOT be undone.');">
                 <button type="submit" class="deleteBtn">Delete Account</button>
             </form>
         </div>
-
     </div>
 {% endblock %}
