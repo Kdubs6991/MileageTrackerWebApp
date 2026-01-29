@@ -54,6 +54,19 @@
     /* Ensures padding doesn't add to the total width, keeping it inside the 100% */
     box-sizing: border-box;
 }
+.rememberMeContainer{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+.rememberMeBox{
+    width: auto;
+    cursor: pointer;
+}
+.rememberMeLabel{
+    cursor: pointer;
+}
 
 
 .formButtons{

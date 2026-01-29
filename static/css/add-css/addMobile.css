@@ -50,6 +50,20 @@
     box-sizing: border-box;
 }
 
+.rememberMeContainer{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+.rememberMeBox{
+    width: auto;
+    cursor: pointer;
+}
+.rememberMeLabel{
+    cursor: pointer;
+}
+
 
 .formButtons{
     display: flex;

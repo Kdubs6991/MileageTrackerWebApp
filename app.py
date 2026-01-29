@@ -467,6 +467,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        remember = True if request.form.get('remember') else False
 
         conn = get_db_connection()
         # Fetch the user record by username OR email
@@ -479,7 +480,7 @@ def login():
         if user and check_password_hash(user['password_hash'], password):
             # Create a User object and log them in using Flask-Login
             user_obj = User(user['id'], user['username'], user['email'], user['password_hash'])
-            login_user(user_obj)
+            login_user(user_obj, remember=remember)
             flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
         else:
