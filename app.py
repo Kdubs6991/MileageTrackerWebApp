@@ -80,7 +80,7 @@ def load_user(user_id):
     user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
     conn.close()
     if user:
-        return User(user['id'], user['username'], user['email'], user['password_hash'])
+        return User(user['id'], user['username'], user['email'], user['password_hash'], user['theme'])
     return None
 
 
@@ -107,7 +107,8 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
             email TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
+            password_hash TEXT NOT NULL,
+            theme TEXT DEFAULT 'light'
         );
     """)
     conn.execute("""
@@ -479,7 +480,7 @@ def login():
         # check_password_hash handles the decryption/comparison securely.
         if user and check_password_hash(user['password_hash'], password):
             # Create a User object and log them in using Flask-Login
-            user_obj = User(user['id'], user['username'], user['email'], user['password_hash'])
+            user_obj = User(user['id'], user['username'], user['email'], user['password_hash'], user['theme'])
             login_user(user_obj, remember=remember)
             flash('Logged in successfully!', 'success')
             return redirect(url_for('home'))
@@ -522,13 +523,25 @@ def export():
 
     # 3. Create a response object that acts as a file download
     output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attatchment; filename=mileage_report.csv"
+    output.headers["Content-Disposition"] = "attachment; filename=mileage_report.csv"
     output.headers["Content-type"] = "text/csv"
     return output
 
-
-
 #-----------------------------------------------------------------------
+
+#
+# App route for Updating the theme (light/dark mode)
+#
+@app.route("/update_theme", methods=["POST"])
+@login_required
+def update_theme():
+    data = request.get_json()
+    theme = data.get('theme')
+    conn = get_db_connection()
+    conn.execute("UPDATE users SET theme = ? WHERE id = ?", (theme, current_user.id))
+    conn.commit()
+    conn.close()
+    return '', 204
 
 
 # Checks if this script is being run directly (e.g., 'python app.py').

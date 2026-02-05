@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.3.2] = 2026-02-05
+### Changed
+- Added a theme toggle button to the account page.
+- Changes most CSS colors for backgrounds and borders to variables to use with the theme toggle.
+
+## [0.3.1] = 2026-01-29
+### Added
+- Created a CHANGELOG file.
+### Changed
+- Updated the about page with more and better information.
+
+
 ## [0.3.0] - 2026-01-27
 ### Added
 - User authentication: register (username, email, password) and login (username or email).

@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Login - Mileage Tracker{% endblock %}
+{% block title %}Account - Mileage Tracker{% endblock %}
 
 {% block stylesheet %}
     <!-- Reuse the add/edit CSS for consistent form styling -->
@@ -27,12 +27,28 @@
             </div>
         </div>
 
-        <!-- Account Actions -->
-        <div class="actionSection">
+        <!-- Section to change small preferences on appearance and functionality -->
+        <div class="preferencesSection">
+            <h3 class="accountTitle">Settings</h3>
+
+            <div class="themeToggleContainer">
+                 <span class="detailLabel">Dark Mode</span>
+                 <label class="switch">
+                     <input type="checkbox" onclick="toggleTheme()" {% if current_user.theme == 'dark' %}checked{% endif %}>
+                     <span class="slider round"></span>
+                 </label>
+             </div>
+        </div>
+
+        <!-- Section to export the data for personal use -->
+        <div class="exportSection">
             <h3 class="accountTitle">Data & Privacy</h3>
 
             <a href="{{ url_for('export') }}" class="exportBtn">Export Data to CSV</a>
+        </div>
 
+        <!-- Account Actions -->
+        <div class="actionSection">
             <a class="logoutBtn" href="{{ url_for('logout') }}">Logout</a>
             <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure? This will permanently delete your account and all mileage entries. This CANNOT be undone.');">
                 <button type="submit" class="deleteBtn">Delete Account</button>

@@ -11,7 +11,7 @@
 
 .aboutSection {
     line-height: 1.6; /* Makes text easier to read */
-    color: #333;
+    color: var(--text-main);
 
     width: 100%;
 }
@@ -23,9 +23,9 @@ h1 {
 
 h2 {
     margin-top: 30px;
-    border-bottom: 2px solid #eee; /* Adds a subtle divider line */
+    border-bottom: 2px solid var(--border-color); /* Adds a subtle divider line */ /* Adds a subtle divider line */
     padding-bottom: 10px;
-    color: #2563eb; /* Matches the blue button color */
+    color: var(--accent-blue); /* Matches the blue button color */ /* Matches the blue button color */
 }
 
 ul {

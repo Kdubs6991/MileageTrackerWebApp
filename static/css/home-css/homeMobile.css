@@ -1,3 +1,18 @@
+/* CSS Variables for Color Theming */
+:root {
+    --action-Btn-bckgnd: #f9f9f9;
+    --action-Btn-Brdr: #ddd;
+    --action-Btn-bckgnd-hvr: #e7e7e7;
+    --action-Btn-Brdr-hvr: #d7d7d7;
+}
+/* Dark Mode Overrides */
+body.darkMode {
+    --action-Btn-bckgnd: #1b1b1b;
+    --action-Btn-Brdr: #4f4f4f;
+    --action-Btn-bckgnd-hvr: #333333;
+    --action-Btn-Brdr-hvr: #4f4f4f;
+}
+
 /* Title for home page*/
 .yearTitle{
     font-family: sans-serif;
@@ -38,8 +53,8 @@
     gap: 20px;
 }
 .statsBox{
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 5px;
     flex: 1;
@@ -49,13 +64,13 @@
 .statsBox h3{
     margin: 0 0 10px 0;
     font-size: 18px;
-    color: #555;
+    color: var(--text-main);
 }
 .statsBox p{
     margin: 0;
     font-size: 24px;
     font-weight: bold;
-    color: #333;
+    color: var(--text-main);
 }
 
 /**/
@@ -72,19 +87,19 @@
 
     border-collapse: collapse;
     box-shadow: 0 0 20px rgba(0,0,0,0.15);
-    background-color: #fff;
+    background-color: var(--bg-card);
 }
 .mileageTable thead tr{
-    background-color: #333333;
-    color: #ffffff;
+    background-color: var(--bg-header);
+    color: var(--text-header);
     text-align: left;
 }
 .mileageTable th, .mileageTable td {
      padding: 12px 15px;
-     border-bottom: 1px solid #dddddd;
+     border-bottom: 1px solid var(--border-color);
  }
 .mileageTable tbody tr:nth-of-type(even) {
-     background-color: #f3f3f3;
+     background-color: var(--table-stripe);
 }
 
 .actionsTableCell{

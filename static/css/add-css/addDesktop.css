@@ -34,7 +34,7 @@
     top: 50%;
     transform: translateY(-50%);
 
-    color: #333;
+    color: var(--text-main);
     pointer-events: none; /* Allows clicking through the symbol to the input */
 }
 /* Add padding so text doesn't overlap the $ initially */
@@ -50,6 +50,9 @@
 .formInput{
     padding: 8px;
     width: 190px;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--border-color);
 
     /* Ensures padding doesn't add to the total width, keeping it inside the 100% */
     box-sizing: border-box;

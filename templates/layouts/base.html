@@ -27,7 +27,7 @@
          </style>
     </head>
 
-    <body>
+    <body class="{% if current_user.is_authenticated and current_user.theme == 'dark' %}darkMode{% endif %}">
         <!-- Header element for the top of the webpage -->
         <header class="mainHeader">
             <!-- Left section to add a small icon image -->
@@ -164,6 +164,23 @@
                 } else {
                     menu.style.width = "250px";
                 }
+            }
+
+            function toggleTheme() {
+                const body = document.body;
+                body.classList.toggle('darkMode');
+
+                const isDark = body.classList.contains('darkMode');
+                const theme = isDark ? 'dark' : 'light';
+
+                // Send preference to server
+                fetch("{{ url_for('update_theme') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ theme: theme })
+                });
             }
         </script>
     </body>

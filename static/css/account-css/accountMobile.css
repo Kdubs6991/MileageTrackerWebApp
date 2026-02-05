@@ -1,3 +1,14 @@
+/* CSS Variables for Color theming */
+:root {
+    --exprt-btn-hvr: #dbffdd;
+    --exprt-btn-hvr-brdr: #9fdca3;
+}
+/* Dark Mode Overrides */
+body.darkMode {
+    --exprt-btn-hvr: #284e2a;
+    --exprt-btn-hvr-brdr: #1e3e20;
+}
+
 /* Override the default base margin so the content is centered properly */
 .mainBody {
     margin-left: 0;
@@ -18,14 +29,24 @@
 h1 {
     margin-bottom: 20px;
 }
-.accountTitle {
+.preferencesSection{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
     margin-bottom: 5px;
+    font-weight: 2000;
+}
+.accountTitle {
+    width: 100%;
+    margin-bottom: 5px;
+    font-weight: 2000;
 }
 
 /* Profile Card Styling */
 .accountCard {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 5px;
 
     padding: 20px;
@@ -42,7 +63,7 @@ h1 {
     flex-direction: column;
 
     margin-bottom: 15px;
-    border-bottom: 2px solid #dad9d9;
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 5px;
 }
 
@@ -50,15 +71,80 @@ h1 {
     margin-bottom: 5px;
 
     font-weight: bold;
-    color: #555;
+    color: var(--text-main);
 }
 
 .detailValue {
-    color: #333;
+    color: var(--text-main);
 }
 
+.themeToggleContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+
+    padding: 15px 20px;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 200px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    margin-left: 5px;
+}
+/* Hide the default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px; left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+}
+input:checked + .slider {
+    background-color: #34c759;
+}
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+.slider.round:before {
+    border-radius: 50%;
+}
+
+
 /* Action Buttons Container */
-.actionSection {
+.actionSection, .exportSection {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -76,8 +162,8 @@ h1 {
     box-sizing: border-box;
 
     border: 1px solid #ddd;
-    background-color: #f9f9f9;
-    color: black;
+    background-color: var(--bg-card);
+    color: var(--text-main);
     font-size: clamp(10px, 5vw, 48px);
     text-decoration: none;
     text-align: center;
@@ -88,8 +174,8 @@ h1 {
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 .exportBtn:hover{
-    background-color: #dbffdd;
-    border-color: #9fdca3;
+    background-color: var(--exprt-btn-hvr);
+    border-color: var(--exprt-btn-hvr-brdr);
 
     transform: scale(1.05);
 }
@@ -103,7 +189,7 @@ h1 {
     width: 30vw;
     box-sizing: border-box;
 
-    border: 1px solid #ddd;
+
     background-color: #2563eb;
     color: white;
     font-size: clamp(10px, 4.5vw, 48px);
