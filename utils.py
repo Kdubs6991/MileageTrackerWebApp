@@ -65,13 +65,10 @@ def calculate_stats(entries):
             dt = entry['date']
 
         if dt:
-            # Week Number Logic: Week 1 starts on December 29th, 2025
-            # We define our "Anchor Date" for when tracking begins.
-            TRACKING_START_DATE = datetime(2025, 12, 29)
-
-            # Math: (Current Date - Start Date) gives total days passed.
-            # Divide by 7 to get weeks passed. Add 1 so we start at "Week 1" not "Week 0".
-            entry['week_num'] = ((dt - TRACKING_START_DATE).days // 7) + 1
+            # Week Number Logic: Use ISO Calendar to determine week number.
+            # This ensures Week 1 is the first week of the year, and resets every year,
+            # preventing negative numbers for past years, and large numbers for future years.
+            entry['week_num'] = dt.isocalendar()[1]
 
             # Calculate the start (Monday) and end (Sunday) of the week
             # dt.weekday() returns 0 for Monday, 1 for Tuesday... 6 for Sunday.

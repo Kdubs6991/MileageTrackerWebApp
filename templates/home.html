@@ -11,7 +11,7 @@
 {% block content %}
 
 <div class="yearTitle">
-        <h1>2026 Delivery Driving Mileage Tracker</h1>
+        <h1>{{ selected_year if selected_year else 'Your' }} Delivery Driving Mileage Tracker</h1>
 </div>
 <div class="contentContainer">
     <!-- The statsWrapper allows the boxes to scroll horizontally on small screens -->
@@ -37,12 +37,28 @@
         </div>
     </div>
 
+    <div class="controlsContainer">
+        <!-- Year Filter Form -->
+        {% if available_years %}
+        <div class="filterContainer">
+            <form method="get" action="{{ url_for('home') }}">
+                <label for="year">Filter by Year:</label>
+                <select name="year" id="year" onchange="this.form.submit()">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if year|int == selected_year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        {% endif %}
+        <p class="entriesCount">Entries count: {{ entries|length }}</p>
+    </div>
+
+
     <!-- Check if there are any entries in the database list -->
     {% if entries|length == 0 %}
         <p>No entries yet. Click <a href="{{ url_for('add') }}" style="font-weight: bold;">Add entry</a> to create one.</p>
     {% else %}
-    <!-- If entries exist, show the count and the table -->
-    <p class="entriesCount">Entries count: {{ entries|length }}</p>
     <!-- tableWrapper handles horizontal scrolling if the table gets too wide -->
     <div class="tableWrapper">
         <table class="mileageTable">
@@ -86,6 +102,36 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination Controls -->
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        <!-- Previous Page Link -->
+        {% if current_page > 1 %}
+            <a href="{{ url_for('home', year=selected_year, page=current_page - 1) }}" class="page-item">&laquo;</a>
+        {% else %}
+            <span class="page-item disabled">&laquo;</span>
+        {% endif %}
+
+        <!-- Page Number Links -->
+        {% for page_num in page_iter %}
+             {% if page_num is none %}
+                 <span class="page-item disabled">...</span>
+             {% elif page_num == current_page %}
+                <span class="page-item active">{{ page_num }}</span>
+            {% else %}
+                <a href="{{ url_for('home', year=selected_year, page=page_num) }}" class="page-item">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Next Page Link -->
+        {% if current_page < total_pages %}
+            <a href="{{ url_for('home', year=selected_year, page=current_page + 1) }}" class="page-item">&raquo;</a>
+        {% else %}
+            <span class="page-item disabled">&raquo;</span>
+        {% endif %}
+    </div>
+    {% endif %}
     {% endif %}
 </div>
 {% endblock %}

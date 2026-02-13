@@ -20,6 +20,23 @@ body.darkMode {
     text-align: center;
 }
 
+.controlsContainer {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto 10px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filterContainer select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--input-text);
+}
+
 /* Home page content container */
 .contentContainer {
     display: flex;
@@ -135,4 +152,39 @@ body.darkMode {
 
     background-color: var(--action-Btn-bckgnd-hvr);
     border-color: var(--action-Btn-Brdr-hvr);
+}
+
+.pagination {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin-top: 30px;
+   gap: 5px;
+   flex-wrap: wrap;
+}
+
+.page-item {
+   display: inline-block;
+   padding: 8px 14px;
+   background-color: var(--bg-card);
+   border: 1px solid var(--border-color);
+   color: var(--accent-blue);
+   text-decoration: none;
+   border-radius: 5px;
+   transition: background-color 0.2s;
+}
+
+.page-item:hover {
+   background-color: var(--action-Btn-bckgnd-hvr);
+}
+.page-item.active {
+   background-color: var(--accent-blue);
+   color: white;
+   border-color: var(--accent-blue);
+   cursor: default;
+}
+
+.page-item.disabled {
+   color: #888;
+   pointer-events: none;
 }

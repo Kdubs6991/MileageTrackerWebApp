@@ -9,6 +9,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.3.3] = 2026-02-12
+### Added
+- **Year Filtering:** Added a dropdown on the home page to filter mileage entries by year.
+- **Pagination:** Implemented pagination for the entries table (15 entries per page).
+- **Smart Pagination UI:** Added logic to display a condensed range of page numbers (e.g., `1 ... 4 5 6 ... 10`) for better usability.
+### Changed
+- Updated the Home page title to dynamically display the selected year.
+- Refactored `home` route in `app.py` to handle filtered and paginated SQL queries.
+- Updated week number calculation in `utils.py` to use ISO calendar weeks. This ensures week numbers reset every year
+ (e.g., Week 1 of 2025) instead of counting negatively from a fixed 2026 start date.
+- Updated Stride CSV import logic to strictly enforce that the uploaded file's most recent week matches the selected
+ entry week. If they do not match, an error is shown and the user is redirected to retry, preventing accidental zero-mile entries.
+### Fixed
+- Fixed an issue where re-uploading a CSV file after an error would fail to read the file content (added file pointer reset).
+- Fixed CSV parsing for files containing a Byte Order Mark (BOM) by using `utf-8-sig` encoding.
+- Prevented saving entries with 0 miles if the CSV parsing yields no valid data.
+
 ## [0.3.2] = 2026-02-05
 ### Changed
 - Added a theme toggle button to the account page.

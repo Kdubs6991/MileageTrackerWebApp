@@ -138,17 +138,56 @@ def init_db():
 @app.route("/")
 @login_required
 def home():
-    # 1. Connect to the database
+    # -- 1. Pagination & Filtering Setup --
+    PER_PAGE = 15 # Entries per page
+    page = request.args.get('page', 1, type=int)
+    selected_year = request.args.get('year', type=int)
+
+    # Connect to the database
     conn = get_db_connection()
 
-    # 2. Fetch all entries for the CURRENT USER only
-    # 'WHERE user_id = ?' ensures users only see their own data.
-    # "ORDER BY date ASC" list the entries starting from week #1 and going forward.
-    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id,)).fetchall()
+    # -- 2. Get available years for the filter dropdown --
+    years_result = conn.execute(
+        "SELECT DISTINCT strftime('%Y', date) as year FROM entries WHERE user_id = ? ORDER BY year DESC",
+        (current_user.id,)
+    ).fetchall()
+    available_years = [row['year'] for row in years_result]
 
-    # 3. Close the connection immediately after fetching data.
+    # -- 3. Determine which year to display --
+    if not selected_year and available_years:
+        # Defaults to the most recent year if none is chosen.
+        selected_year = int(available_years[0])
+    elif selected_year and str(selected_year) not in available_years:
+        # Handle case where user types a year with no entries, default to most recent.
+        flash(f"No entries found for the year {selected_year}.", "warning")
+        selected_year = int(available_years[0]) if available_years else None
+
+    # -- 4. Get paginated entries for the selected year --
+    if selected_year:
+        # Get total count for pagination
+        total_entries_count = conn.execute(
+            "SELECT COUNT(id) FROM entries WHERE user_id = ? AND strftime('%Y', date) = ?",
+            (current_user.id, str(selected_year))
+        ).fetchone()[0]
+
+        total_pages = (total_entries_count + PER_PAGE - 1) // PER_PAGE
+
+        # Get the actual entries for the current page
+        offset = (page - 1) * PER_PAGE
+        rows = conn.execute(
+            "SELECT * FROM entries WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date ASC LIMIT ? OFFSET ?",
+            (current_user.id, str(selected_year), PER_PAGE, offset)
+        ).fetchall()
+    else:
+        # No entries exist for this user at all
+        rows = []
+        total_pages = 0
+
+
+    # Close the connection immediately after fetching data.
     conn.close()
 
+    # -- 5. Process rows for display --
     # Convert rows to dictionaries so utils.py can modify the data (add week_num, etc.)
     # SQLite rows are read-only. We convert them to dicts so we can add new keys.
     # (like 'week_num', 'set_aside', etc.) inside the calculate_stats function.
@@ -158,10 +197,33 @@ def home():
     # and formats the dates/money for display.
     totals = calculate_stats(entries)
 
-    # 4. Render the HTML template.
+    # -- Pagination Logic for UI --
+    page_iter = []
+    if total_pages > 1:
+        if total_pages <= 7:
+            page_iter = list(range(1, total_pages + 1))
+        else:
+            page_iter.append(1)
+            # Window of +/- 1 around current page
+            window_start = max(2, page - 1)
+            window_end = min(total_pages - 1, page + 1)
+
+            if window_start > 2:
+                page_iter.append(None) # Represents '...'
+
+            for p in range(window_start, window_end + 1):
+                page_iter.append(p)
+
+            if window_end < total_pages - 1:
+                page_iter.append(None) # Represents '...'
+
+            page_iter.append(total_pages)
+
+    # -- 6. Render the HTML template. --
     # We pass 'entries' (the list of rows) and '**totals' (unpacked dictionary of totals)
     # so they can be used inside {{ }} tags in home.html.
-    return render_template("home.html", entries=entries, **totals)
+    return render_template("home.html", entries=entries, **totals, available_years=available_years,
+                           selected_year=selected_year, current_page=page, total_pages=total_pages, page_iter=page_iter)
 
 #---------------------------------------------------------
 
@@ -202,10 +264,16 @@ def add():
             if file.filename != '':
                 file_processed = True
 
+                # Safety: Reset file pointer to the beginning
+                file.stream.seek(0)
                 # Read the CSV file from memory (without saving to disk).
-                # .decode("UTF8") converts raw bytes to string.
-                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                # .decode("utf-8-sig") converts raw bytes to string and handles BOM (Byte Order Mark).
+                stream = io.StringIO(file.stream.read().decode("utf-8-sig"), newline=None)
                 csv_input = csv.DictReader(stream)
+
+                # Store parsed rows to avoid re-reading/re-parsing
+                parsed_rows = []
+                max_csv_date = None
 
                 # Loop through every row in the CSV file.
                 for row in csv_input:
@@ -227,21 +295,44 @@ def add():
                         except ValueError:
                             continue
 
-                    if not row_dt: continue
+                    if row_dt:
+                        parsed_rows.append({'dt': row_dt, 'dist': dist_str})
+                        # Track the latest date found in the file
+                        if max_csv_date is None or row_dt > max_csv_date:
+                            max_csv_date = row_dt
 
-                    # Filter: Only add miles if the trip happened during the selected week.
-                    if monday_of_week.date() <= row_dt.date() <= sunday_of_week.date():
-                        try:
-                            # Clean the distance string (remove " mi") and convert to float.
-                            trip_miles = float(dist_str.replace(" mi", "").strip())
-                            miles += trip_miles
-                        except ValueError:
-                            continue
+                # Logic: Only process if the selected week matches the week of the most recent CSV entry
+                if max_csv_date:
+                    # Calculate the Monday of the most recent entry in the CSV
+                    max_csv_monday = max_csv_date - timedelta(days=max_csv_date.weekday())
+
+                    # Check if the form's selected week matches the CSV's latest week
+                    if monday_of_week.date() != max_csv_monday.date():
+                        flash(
+                            f"Error: The CSV file's most recent week ({max_csv_monday.strftime('%b %d')}) does not match the selected week ({monday_of_week.strftime('%b %d')}).",
+                            "error")
+                        return redirect(url_for("add"))
+
+                    for row in parsed_rows:
+                        # Filter: Only add miles if the trip happened during the selected week.
+                        if monday_of_week.date() <= row['dt'].date() <= sunday_of_week.date():
+                            try:
+                                # Clean the distance string (remove " mi") and convert to float.
+                                trip_miles = float(row['dist'].replace(' mi', '').strip())
+                                miles += trip_miles
+                            except ValueError:
+                                continue
+                else:
+                    flash("Error: Could not find any valid dates in the uploaded CSV. Please check the file format.",
+                          "error")
+                    return redirect(url_for("add"))
+
                 # If statement detects if there were any miles add for the week selected, and flashes a message accordingly
                 if miles > 0:
                     flash(f"Success! Imported {miles: .2f} miles from Stride CSV.", "success")
                 else:
-                    flash("CSV processed, but no trips were found for this specific week.", "warning")
+                    flash("CSV processed, but no trips were found for this specific week. Entry not saved.", "warning")
+                    return redirect(url_for("add"))
 
         # 4. Fallback: If no file was uploaded, use the manual input box.
         if not file_processed:
