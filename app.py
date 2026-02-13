@@ -338,13 +338,25 @@ def add():
         if not file_processed:
             manual_miles = request.form.get("miles")
             if manual_miles:
-                miles = float(manual_miles)
+                try:
+                    miles = float(manual_miles)
+                    if miles < 0:
+                        flash("Miles cannot be negative.", "error")
+                        return redirect(url_for("add"))
+                except ValueError:
+                    miles = 0.0
                 flash("Entry added successfully!", "success")
 
         # 5. Get the remaining form data.
         # Convert earnings to float, defaulting to 0.0 if empty.
         earnings_str = request.form.get("earnings", "")
-        earnings = float(earnings_str) if earnings_str else 0.0
+        try:
+            earnings = float(earnings_str) if earnings_str else 0.0
+            if earnings < 0:
+                flash("Earnings cannot be negative.", "error")
+                return redirect(url_for("add"))
+        except ValueError:
+            earnings = 0.0
 
         notes = request.form["notes"]
 
@@ -402,10 +414,22 @@ def edit(id):
         # Get other fields from the form.
         # Convert to floats to ensure we don't save empty strings to the database
         miles_Str = request.form.get("miles", "")
-        miles = float(miles_Str) if miles_Str else 0.0
+        try:
+            miles = float(miles_Str) if miles_Str else 0.0
+            if miles < 0:
+                flash("Miles cannot be negative.", "error")
+                return redirect(url_for("edit", id=id))
+        except ValueError:
+            miles = 0.0
 
         earnings_str = request.form.get("earnings", "")
-        earnings = float(earnings_str) if earnings_str else 0.0
+        try:
+            earnings = float(earnings_str) if earnings_str else 0.0
+            if earnings < 0:
+                flash("Earnings cannot be negative.", "error")
+                return redirect(url_for("edit", id=id))
+        except ValueError:
+            earnings = 0.0
 
         notes = request.form["notes"]
 

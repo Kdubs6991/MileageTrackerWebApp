@@ -55,9 +55,6 @@ body.darkMode {
 }
 
 .headerLogoContainer{
-    /* background-color: blue; */
-    /* background color used for development/debugging */
-
     /* Making the logo shrink if it gets too small */
     display: flex;
     flex: 0.2;

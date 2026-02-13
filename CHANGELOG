@@ -6,6 +6,10 @@ All major changes to this project will be recorded in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
  and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Released]
+
+## [1.0.0] - 2026-02-13
+
 
 ## [Unreleased]
 
@@ -14,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Year Filtering:** Added a dropdown on the home page to filter mileage entries by year.
 - **Pagination:** Implemented pagination for the entries table (15 entries per page).
 - **Smart Pagination UI:** Added logic to display a condensed range of page numbers (e.g., `1 ... 4 5 6 ... 10`) for better usability.
+- **Input Validation** Anywhere a user can enter a value, the backend input validation has been updated to reject negative numbers.
 ### Changed
 - Updated the Home page title to dynamically display the selected year.
 - Refactored `home` route in `app.py` to handle filtered and paginated SQL queries.
