@@ -6,6 +6,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>{% block title%}Milage Tracker{% endblock %}</title>
 
         <!-- Responsive Css Loading:
@@ -174,10 +175,15 @@
                 const theme = isDark ? 'dark' : 'light';
 
                 // Send preference to server
+                const csrfToken = document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute('content');
+
                 fetch("{{ url_for('update_theme') }}", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
                     },
                     body: JSON.stringify({ theme: theme })
                 });

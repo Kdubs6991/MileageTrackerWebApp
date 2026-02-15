@@ -23,6 +23,7 @@
     <!-- enctype="multipart/form-data" is REQUIRED whenever you have a file upload input.
          Without this, the server will not receive the file. -->
     <form method="post" class="addForm" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="formInputContainer">
             <label for="date">Week of (Select any day)</label><br>
             <input type="date" name="date" id="date" required class="formInput" value="{{ today }}">

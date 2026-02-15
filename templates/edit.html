@@ -16,6 +16,7 @@
 
     <!-- The form uses method="post" to send data to the server. -->
     <form method="post" class="editForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="formInputContainer">
             <label for="date">Week of (Select any day)</label><br>
             <!-- value="{{ entry['date'] }}" pre-fills the input with the date from the database -->

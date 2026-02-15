@@ -4,11 +4,15 @@
 # redirect/url_for: moves users to different pages.
 # flash: stores temporary messages (like success/error notifications) to show on the next page load.
 from flask import Flask, render_template, request, redirect, url_for, flash, make_response
+from flask_wtf.csrf import CSRFProtect
 
 # os: Used to access operating system functionality, specifically environment variables.
 import os
 # dotenv: Loads environment variables from a .env file into os.environ.
 from dotenv import load_dotenv
+
+# Load environment variables from .env (local dev only; on a host you'll set real env vars)
+load_dotenv()
 
 # Flask-Login: Manages user sessions and authentication.
 # LoginManager: The main class that handles the login process.
@@ -47,10 +51,38 @@ from pathlib import Path
 # Creates the Flask application instance.
 # Passing __name__ tells Flask where to look for templates and static files.
 app = Flask(__name__)
-# Secret key is required for session data (like Flash messages).
-# In a real production app, this should be a long random string hidden in an environment variable.
-app.secret_key = os.environ.get("SECRET_KEY", "dev_key_for_mileage_tracker")
+# --- Configuration (dev vs prod) ---
+# In production, you MUST set SECRET_KEY in the environment.
+secret = os.environ.get("SECRET_KEY")
+if not secret:
+    # Safe default for local development only.
+    # IMPORTANT: set SECRET_KEY in your hosting provider before deploying.
+    secret = "dev_key_for_mileage_tracker"
+app.secret_key = secret
 
+# Cookie / session hardening
+# NOTE: SESSION_COOKIE_SECURE should be True when served over HTTPS (typical in production).
+is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") == "production"
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=is_prod,
+    REMEMBER_COOKIE_HTTPONLY=True,
+    REMEMBER_COOKIE_SAMESITE="Lax",
+    REMEMBER_COOKIE_SECURE=is_prod,
+)
+
+# Upload safety: limit request size (prevents large file uploads / DOS)
+app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_CONTENT_LENGTH", 5 * 1024 * 1024))  # 5 MB default
+
+# CSRF protection for all POST/PUT/PATCH/DELETE requests
+# Templates must include a hidden input named 'csrf_token'.
+app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
+csrf = CSRFProtect(app)
+
+# In production, require a real SECRET_KEY
+if is_prod and secret == "dev_key_for_mileage_tracker":
+    raise RuntimeError("SECRET_KEY must be set in production")
 # -------------------------------
 
 # Initialize Flask-Login
@@ -262,13 +294,32 @@ def add():
             file = request.files['file']
             # Ensure the user actually selected a file (filename is not empty)
             if file.filename != '':
+                # Basic validation: only allow CSV uploads
+                filename_lower = file.filename.lower()
+                if not filename_lower.endswith('.csv'):
+                    flash("Error: Please upload a .csv file.", "error")
+                    return redirect(url_for("add"))
+
+                # Some browsers send useful mimetypes, some don't; accept common CSV types
+                if file.mimetype and ('csv' not in file.mimetype and file.mimetype not in ('application/vnd.ms-excel',)):
+                    flash("Error: Uploaded file does not look like a CSV.", "error")
+                    return redirect(url_for("add"))
+
                 file_processed = True
 
                 # Safety: Reset file pointer to the beginning
                 file.stream.seek(0)
                 # Read the CSV file from memory (without saving to disk).
                 # .decode("utf-8-sig") converts raw bytes to string and handles BOM (Byte Order Mark).
-                stream = io.StringIO(file.stream.read().decode("utf-8-sig"), newline=None)
+                try:
+                    raw = file.stream.read()
+                    text = raw.decode("utf-8-sig")
+                except Exception:
+                    flash("Error: Could not read the uploaded file. Please upload a valid UTF-8 CSV.", "error")
+                    return redirect(url_for("add"))
+
+                stream = io.StringIO(text, newline=None)
+
                 csv_input = csv.DictReader(stream)
 
                 # Store parsed rows to avoid re-reading/re-parsing
@@ -516,6 +567,7 @@ def about():
 # App route for the user's account information
 #
 @app.route("/account")
+@login_required
 def account():
     return render_template("auth/account.html")
 
@@ -652,6 +704,9 @@ def export():
 def update_theme():
     data = request.get_json()
     theme = data.get('theme')
+    if theme not in ("light", "dark"):
+        return "Invalid theme", 400
+
     conn = get_db_connection()
     conn.execute("UPDATE users SET theme = ? WHERE id = ?", (theme, current_user.id))
     conn.commit()
@@ -665,9 +720,6 @@ if __name__ == "__main__":
     # Initialize the database (create tables) before starting the server.
     init_db()
 
-    # Start the Flask development server.
-    # debug=True: Automatically restarts the server when you save code changes
-    #             and shows detailed error messages in the browser.
-    # host="127.0.0.1": Runs the app on your local machine (localhost).
-    # port=5050: The address will be http://127.0.0.1:5050
-    app.run(debug=True, host="127.0.0.1", port=5050)
+    # Dev server only. In production, run with a WSGI server like gunicorn.
+    debug = os.environ.get("FLASK_DEBUG") == "1"
+    app.run(debug=debug, host="127.0.0.1", port=5050)

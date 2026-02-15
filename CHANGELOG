@@ -2,16 +2,30 @@
 
 All major changes to this project will be recorded in this file.
 
-
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
  and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Released]
 
-## [1.0.0] - 2026-02-13
+## [1.0.0] = 2026-02-13
 
 
 ## [Unreleased]
+
+## [0.3.4] = 2026-02-14
+### Added
+- Production-ready configuration (environment-based SECRET_KEY enforcement).
+- CSRF protection across all POST routes using Flask-WTF.
+- CSRF token integration for AJAX theme toggle requests.
+- Upload size limit (`MAX_CONTENT_LENGTH`) to prevent oversized file submissions.
+- CSV upload validation (file extension + mimetype checks).
+- Safer CSV decoding with explicit UTF-8 error handling.
+- Gunicorn support for production deployment.
+### Changed
+- Hardened session and remember-me cookies (HttpOnly, SameSite, Secure in production).
+- Theme update route now validates allowed values ("light" or "dark").
+- Updated templates to include CSRF tokens in all forms.
+- Improved overall production security posture prior to public deployment.
 
 ## [0.3.3] = 2026-02-12
 ### Added
@@ -43,20 +57,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Updated the about page with more and better information.
 
 
-## [0.3.0] - 2026-01-27
+## [0.3.0] = 2026-01-27
 ### Added
 - User authentication: register (username, email, password) and login (username or email).
 - Account page.
 - Database records linked to the authenticated user.
 
-## [0.2.3] - 2026-01-19
+## [0.2.3] = 2026-01-19
 ### Added
 - Account page UI/content updates.
 - Authentication links added to the navigation and footer.
 - User management routes (logout and delete user).
 - Export table data feature.
 
-## [0.2.2] - 2026-01-16
+## [0.2.2] = 2026-01-16
 ### Added
 - `requirements.txt` to document backend dependencies (e.g., Flask, python-dotenv).
 - `SECRET_KEY` configuration and updates in `app.py` to use it.
@@ -68,39 +82,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Bug fix in `app.py`.
 - Updated `.gitignore`.
 
-## [0.2.1] - 2026-01-15
+## [0.2.1] = 2026-01-15
 ### Added
 - Stride CSV upload on the Add page; parses mileage and calculates totals for the correct week.
 ### Changed
 - Added comments throughout the codebase explaining what things do and why.
 
-## [0.2.0] - 2026-01-14
+## [0.2.0] = 2026-01-14
 ### Added
 - Edit page HTML templates.
 - Responsive CSS (mobile + desktop) for the Edit and Add pages.
 ### Changed
 - Tweaked CSS in the home files and base layout files.
 
-## [0.1.1] - 2026-01-12
+## [0.1.1] = 2026-01-12
 ### Added
 - Completed header and footer CSS for desktop and mobile base styles.
 - Mobile hamburger menu (via script in `base.html`).
 
-## [0.1.0] - 2026-01-09
+## [0.1.0] = 2026-01-09
 ### Changed
 - Re-organized directories for layouts and images.
 - Improved header interactions (hover movement) and added custom nav links (home, add, about, Google Sheets, Linktree, etc.).
 
-## [0.0.2] - 2026-01-08
+## [0.0.2] = 2026-01-08
 ### Added
 - Base template that renders different CSS files for different screen sizes.
 - Started custom CSS work on the main page.
 
-## [0.0.1] - 2026-01-07
+## [0.0.1] = 2026-01-07
 ### Added
 - Initial form working and database displayed in a table.
 
-## [0.0.0] - 2026-01-02
+## [0.0.0] = 2026-01-02
 ### Added
 - Initial Flask app with routes and SQLite setup (initial push).
 

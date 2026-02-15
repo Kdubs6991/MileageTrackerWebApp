@@ -93,7 +93,8 @@
                             <!-- Delete must be a FORM with method="POST" for security.
                                  We use onsubmit to show a confirmation popup before sending. -->
                             <form action="{{ url_for('delete', id=entry['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this entry?');">
-                             <button type="submit" class="deleteBtn">Delete</button>
+                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                 <button type="submit" class="deleteBtn">Delete</button>
                             </form>
                         </div>
                     </td>

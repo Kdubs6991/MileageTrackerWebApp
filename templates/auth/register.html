@@ -13,6 +13,7 @@
         <h1>Create Account</h1>
 
         <form method="post" class="addForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="formInputContainer">
                 <label for="username">Username</label><br>
                 <input type="text" name="username" id="username" required class="formInput">

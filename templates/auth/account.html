@@ -51,6 +51,7 @@
         <div class="actionSection">
             <a class="logoutBtn" href="{{ url_for('logout') }}">Logout</a>
             <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('Are you sure? This will permanently delete your account and all mileage entries. This CANNOT be undone.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="deleteBtn">Delete Account</button>
             </form>
         </div>
