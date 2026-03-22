@@ -160,6 +160,8 @@ def init_db():
     #  good to prevent errors such as 'Database is locked'.
     conn.close()
 
+    with app.app_context():
+        init_db()
 #-----------------------------------------------------------------------
 
 #
@@ -723,3 +725,4 @@ if __name__ == "__main__":
     # Dev server only. In production, run with a WSGI server like gunicorn.
     debug = os.environ.get("FLASK_DEBUG") == "1"
     app.run(debug=debug, host="127.0.0.1", port=5050)
+
