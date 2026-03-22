@@ -160,8 +160,8 @@ def init_db():
     #  good to prevent errors such as 'Database is locked'.
     conn.close()
 
-    with app.app_context():
-        init_db()
+with app.app_context():
+    init_db()
 #-----------------------------------------------------------------------
 
 #
