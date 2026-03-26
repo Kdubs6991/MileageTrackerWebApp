@@ -2,16 +2,29 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Database
 *.db
+
+# Logs
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
 
 # IDE
 .idea/
 
 # OS junk
 .DS_Store
-.env
+Thumbs.db
 
-#Development Notes on what to do next
+# Development notes
 TODO.md

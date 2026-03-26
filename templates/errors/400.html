@@ -1,0 +1,78 @@
+<!--
+Error Type: 400 Bad Request
+
+Meaning:
+This page is shown when the request sent by the client is invalid or incomplete.
+The server received the request, but it could not process it because something
+about the request was wrong.
+
+Common Causes:
+- Missing or invalid CSRF token
+- Expired form/session data
+- Missing required request data
+- Malformed form or JSON submission
+- Browser sending stale or incomplete data
+
+How this template is used:
+- The backend (app.py) detects a bad request
+- It can pass a custom `error_type` value to this template
+- The template shows a more specific user-friendly message based on that type
+
+User Experience Goal:
+- Explain that the request could not be completed
+- Avoid exposing technical details
+- Help the user recover by refreshing, logging in again, or returning home
+-->
+
+{% extends "layouts/base.html" %}
+
+{% block title %}Bad Request{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px; max-width: 700px; margin: 0 auto;">
+    <h1 style="font-size: 3rem;">400</h1>
+    <h2 style="margin-top: 10px;">Bad Request</h2>
+
+    {% if error_type == "csrf" %}
+        <p style="font-size: 1.1rem; margin-top: 15px;">
+            Your session expired or the form became invalid. Please try again.
+        </p>
+    {% elif error_type == "form" %}
+        <p style="font-size: 1.1rem; margin-top: 15px;">
+            Some required information was missing or invalid. Please review your input and try again.
+        </p>
+    {% elif error_type == "json" %}
+        <p style="font-size: 1.1rem; margin-top: 15px;">
+            The request data was not in the expected format. Please refresh and try again.
+        </p>
+    {% else %}
+        <p style="font-size: 1.1rem; margin-top: 15px;">
+            The request could not be completed. Please refresh the page and try again.
+        </p>
+    {% endif %}
+
+    <div style="margin-top: 30px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('home') }}" style="
+            padding: 10px 20px;
+            background-color: #ff3008;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        ">
+            Go Home
+        </a>
+
+        <a href="javascript:history.back()" style="
+            padding: 10px 20px;
+            background-color: #444;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        ">
+            Go Back
+        </a>
+    </div>
+</div>
+{% endblock %}

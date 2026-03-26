@@ -1,0 +1,60 @@
+<!--
+Error Type: 500 Internal Server Error
+
+Meaning:
+This page is shown when something goes wrong on the server side.
+The request reached the server correctly, but the server failed while processing it.
+
+Common Causes:
+- Database errors (e.g., SQLite issues, missing tables, connection failures)
+- Application crashes (exceptions in Python code)
+- Logic errors in routes
+- Unexpected failures in backend processing
+
+How this template is used:
+- The backend (app.py) detects the error
+- It classifies the error type (e.g., "database", "auth", or general)
+- It passes `error_type` to this template
+- The template displays a user-friendly message based on that type
+
+User Experience Goal:
+- Hide technical error details
+- Show a clear, friendly message
+- Allow user to safely return to the app
+-->
+{% extends "layouts/base.html" %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px;">
+    <h1 style="font-size: 3rem;">Something went wrong</h1>
+
+    {% if error_type == "database" %}
+        <p style="font-size: 1.2rem; margin-top: 10px;">
+            There was a problem accessing data. Please try again shortly.
+        </p>
+    {% elif error_type == "auth" %}
+        <p style="font-size: 1.2rem; margin-top: 10px;">
+            There was an issue with your account session. Please log in again.
+        </p>
+    {% else %}
+        <p style="font-size: 1.2rem; margin-top: 10px;">
+            An unexpected error occurred. Please try again later.
+        </p>
+    {% endif %}
+
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('home') }}" style="
+            padding: 10px 20px;
+            background-color: #ff3008;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        ">
+            Go Home
+        </a>
+    </div>
+</div>
+{% endblock %}

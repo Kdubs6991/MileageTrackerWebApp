@@ -1,0 +1,28 @@
+<!--
+ Error 404 is for page not found
+-->
+{% extends "layouts/base.html" %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 50px;">
+    <h1 style="font-size: 3rem;">404</h1>
+    <p style="font-size: 1.2rem; margin-top: 10px;">
+        Oops! The page you’re looking for doesn’t exist.
+    </p>
+
+    <div style="margin-top: 30px;">
+        <a href="{{ url_for('home') }}" style="
+            padding: 10px 20px;
+            background-color: #ff3008;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        ">
+            Go Back Home
+        </a>
+    </div>
+</div>
+{% endblock %}

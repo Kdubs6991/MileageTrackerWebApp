@@ -3,11 +3,17 @@
 # request: handles incoming data (forms, files).
 # redirect/url_for: moves users to different pages.
 # flash: stores temporary messages (like success/error notifications) to show on the next page load.
-from flask import Flask, render_template, request, redirect, url_for, flash, make_response
-from flask_wtf.csrf import CSRFProtect
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response, session
+from flask_wtf.csrf import CSRFProtect, CSRFError
 
 # os: Used to access operating system functionality, specifically environment variables.
 import os
+# logging: Python's built-in logging system.
+# We use this to record important events and server errors to a file.
+import logging
+# RotatingFileHandler: Keeps log files from growing forever by rotating them
+# once they reach a certain size.
+from logging.handlers import RotatingFileHandler
 # dotenv: Loads environment variables from a .env file into os.environ.
 from dotenv import load_dotenv
 
@@ -41,8 +47,13 @@ from models import User
 
 # Import for database interation.
 import sqlite3
+# DatabaseError: Base class for database-related failures.
+# IntegrityError: Used for constraint violations like duplicate unique values.
+from sqlite3 import DatabaseError, IntegrityError
 # Import for handling file system paths (finding the database file).
 from pathlib import Path
+
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 #-----------------------------------------------------------------------
 
@@ -51,6 +62,9 @@ from pathlib import Path
 # Creates the Flask application instance.
 # Passing __name__ tells Flask where to look for templates and static files.
 app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 # --- Configuration (dev vs prod) ---
 # In production, you MUST set SECRET_KEY in the environment.
 secret = os.environ.get("SECRET_KEY")
@@ -78,7 +92,125 @@ app.config["MAX_CONTENT_LENGTH"] = int(os.environ.get("MAX_CONTENT_LENGTH", 5 * 
 # CSRF protection for all POST/PUT/PATCH/DELETE requests
 # Templates must include a hidden input named 'csrf_token'.
 app.config["WTF_CSRF_HEADERS"] = ["X-CSRFToken", "X-CSRF-Token"]
+app.config["WTF_CSRF_TIME_LIMIT"] = 60 * 60  # 1 hour
 csrf = CSRFProtect(app)
+
+#---------------------------------------------------------
+# Logging Setup
+#---------------------------------------------------------
+# Goal:
+# Create a real log file for the app so backend problems can be diagnosed later.
+# This is especially useful once the app is deployed, because users should see
+# friendly error pages while developers can still inspect the real error details.
+#
+# What this does:
+# - Creates a "logs" folder next to the app if it does not already exist.
+# - Writes logs to logs/app.log
+# - Rotates the log file when it reaches 1 MB
+# - Keeps up to 5 old log files as backups
+#
+# Example files that may be created:
+#   logs/app.log
+#   logs/app.log.1
+#   logs/app.log.2
+#
+# app.root_path points to the folder where this Flask app lives.
+log_dir = os.path.join(app.root_path, "logs")
+# Make the logs folder if it does not already exist.
+os.makedirs(log_dir, exist_ok=True)
+# Full path to the main application log file.
+log_file = os.path.join(log_dir, "app.log")
+
+# Create a rotating file handler.
+# maxBytes = 1 MB, backupCount = 5 means:
+# - Once app.log reaches ~1 MB, Flask will rename it and start a fresh file.
+# - Up to 5 older log files will be kept.
+file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
+
+# Log INFO and above.
+# Levels in order are usually:
+# DEBUG < INFO < WARNING < ERROR < CRITICAL
+file_handler.setLevel(logging.INFO)
+
+# Format for each log line.
+# Example:
+# 2026-03-25 20:15:10,123 INFO [app] Mileage Tracker app startup
+file_handler.setFormatter(logging.Formatter(
+    "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+))
+
+# Avoid adding duplicate handlers if the app reloads.
+# This prevents the same message from being written multiple times.
+if not any(isinstance(handler, RotatingFileHandler) for handler in app.logger.handlers):
+    app.logger.addHandler(file_handler)
+
+# Set the Flask app logger level.
+app.logger.setLevel(logging.INFO)
+
+# Log one startup message so we know the app booted.
+app.logger.info("Mileage Tracker app startup")
+
+#---------------------------------------------------------
+# Error Handlers
+#---------------------------------------------------------
+
+# CSRF errors are a specific type of 400 Bad Request.
+# We clear the session, show a friendly message, and redirect
+# the user so a fresh session/token can be created.
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    session.clear()
+    flash("Your session expired or became invalid. Please try again.", "error")
+    return redirect(url_for("login"))
+
+
+# Generic 400 Bad Request handler.
+# Used when the request is invalid, incomplete, or malformed.
+@app.errorhandler(400)
+def bad_request(e):
+    error_type = "general"
+    error_text = str(e).lower()
+
+    if "csrf" in error_text:
+        error_type = "csrf"
+    elif "json" in error_text:
+        error_type = "json"
+    elif "form" in error_text or "missing" in error_text or "invalid" in error_text:
+        error_type = "form"
+
+    # Log the 400 error so developers can see what kind of bad request happened.
+    # Examples: malformed JSON, missing form data, invalid request state, etc.
+    app.logger.warning(f"400 Bad Request: {e}")
+    return render_template("errors/400.html", error_type=error_type), 400
+
+
+# 404 Not Found handler.
+# Used when a page or route does not exist.
+@app.errorhandler(404)
+def not_found(e):
+    # Log the missing path so we can see which URL the user tried to access.
+    # Useful for spotting typos, broken links, or routes we forgot to create.
+    app.logger.info(f"404 Not Found: {request.path}")
+    return render_template("errors/404.html"), 404
+
+
+# 500 Internal Server Error handler.
+# Used when the backend fails while processing a valid request.
+@app.errorhandler(500)
+def server_error(e):
+    error_type = "general"
+    error_text = str(e).lower()
+
+    if "sqlite" in error_text or "database" in error_text:
+        error_type = "database"
+    elif "auth" in error_text or "login" in error_text or "session" in error_text:
+        error_type = "auth"
+
+    # Log the full exception traceback.
+    # `.exception(...)` is important here because it records the stack trace,
+    # which is the most helpful information when debugging backend crashes.
+    app.logger.exception(f"500 Internal Server Error: {e}")
+    return render_template("errors/500.html", error_type=error_type), 500
 
 # In production, require a real SECRET_KEY
 if is_prod and secret == "dev_key_for_mileage_tracker":
@@ -97,10 +229,14 @@ login_manager.login_view = 'login' #Redirects users here if they try to access a
 # .with_name("milage.db") makes sure we look for the database in the same folder as app.py.
 DB_PATH = Path(__file__).with_name("mileage.db")
 
-# Helper function to connect to the database.
 def get_db_connection():
     # Opens a connection to the SQLite database file defined in DB_PATH.
-    conn = sqlite3.connect(DB_PATH)
+    # timeout=10 helps reduce immediate "database is locked" failures by letting
+    # SQLite wait briefly for the database to become available.
+    # Use the test database path if one was provided in app config.
+    # Otherwise fall back to the normal app database file.
+    db_path = app.config.get("DATABASE", DB_PATH)
+    conn = sqlite3.connect(db_path, timeout=10)
     # Sets the row_factory to sqlite3.Row so we can access columns by name.
     # (e.g., row['date']) instead of (row[0]).
     conn.row_factory = sqlite3.Row
@@ -108,57 +244,56 @@ def get_db_connection():
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
-    conn.close()
-    if user:
-        return User(user['id'], user['username'], user['email'], user['password_hash'], user['theme'])
-    return None
+    conn = None
+    try:
+        conn = get_db_connection()
+        user = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+        if user:
+            return User(user['id'], user['username'], user['email'], user['password_hash'], user['theme'])
+        return None
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while loading user {user_id}: {e}")
+        return None
+    finally:
+        if conn is not None:
+            conn.close()
 
 
-# Initializes the database by creating the 'entries' table if it doesn't exist.
-# This ensures the app has a place to store data when it first runs.
-#
-# Table Schema:
-#   Users Table:
-#   - id: Unique User ID
-#   - username: The login name
-#   - password_hash: The encrypted password
-#
-#   Entries Table:
-#   - id: Unique identifier for each row (Primary Key).
-#   - user_id: Links the entry to a specific user.
-#   - date: The Monday date of the week (stored as TEXT 'YYYY-MM-DD').
-#   - miles: Total miles driven (stored as REAL/Float).
-#   - earnings: Total money made (stored as REAL/Float).
-#   - notes: Optional additional notes (stored as TEXT).
+
 def init_db():
-    conn = get_db_connection()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            email TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL,
-            theme TEXT DEFAULT 'light'
-        );
-    """)
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS entries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        date TEXT NOT NULL,
-        miles REAL NOT NULL,
-        earnings REAL NOT NULL,
-        notes TEXT,
-        FOREIGN KEY (user_id) REFERENCES users (id)
-        );
-    """)
-    # Commits the changes to the database (saves whatever was done to it).
-    conn.commit()
-    # Closes the connection to the database. Good for saving computer memory and
-    #  good to prevent errors such as 'Database is locked'.
-    conn.close()
+    conn = None
+    try:
+        conn = get_db_connection()
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                theme TEXT DEFAULT 'light'
+            );
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                miles REAL NOT NULL,
+                earnings REAL NOT NULL,
+                notes TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            );
+        """)
+        # Commits the changes to the database (saves whatever was done to it).
+        conn.commit()
+    except DatabaseError as e:
+        app.logger.exception(f"Database initialization failed: {e}")
+        raise
+    finally:
+        # Closes the connection to the database. Good for saving computer memory and
+        # good to prevent errors such as 'Database is locked'.
+        if conn is not None:
+            conn.close()
 
 with app.app_context():
     init_db()
@@ -177,49 +312,59 @@ def home():
     page = request.args.get('page', 1, type=int)
     selected_year = request.args.get('year', type=int)
 
-    # Connect to the database
-    conn = get_db_connection()
+    conn = None
+    try:
+        # Connect to the database
+        conn = get_db_connection()
 
-    # -- 2. Get available years for the filter dropdown --
-    years_result = conn.execute(
-        "SELECT DISTINCT strftime('%Y', date) as year FROM entries WHERE user_id = ? ORDER BY year DESC",
-        (current_user.id,)
-    ).fetchall()
-    available_years = [row['year'] for row in years_result]
-
-    # -- 3. Determine which year to display --
-    if not selected_year and available_years:
-        # Defaults to the most recent year if none is chosen.
-        selected_year = int(available_years[0])
-    elif selected_year and str(selected_year) not in available_years:
-        # Handle case where user types a year with no entries, default to most recent.
-        flash(f"No entries found for the year {selected_year}.", "warning")
-        selected_year = int(available_years[0]) if available_years else None
-
-    # -- 4. Get paginated entries for the selected year --
-    if selected_year:
-        # Get total count for pagination
-        total_entries_count = conn.execute(
-            "SELECT COUNT(id) FROM entries WHERE user_id = ? AND strftime('%Y', date) = ?",
-            (current_user.id, str(selected_year))
-        ).fetchone()[0]
-
-        total_pages = (total_entries_count + PER_PAGE - 1) // PER_PAGE
-
-        # Get the actual entries for the current page
-        offset = (page - 1) * PER_PAGE
-        rows = conn.execute(
-            "SELECT * FROM entries WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date ASC LIMIT ? OFFSET ?",
-            (current_user.id, str(selected_year), PER_PAGE, offset)
+        # -- 2. Get available years for the filter dropdown --
+        years_result = conn.execute(
+            "SELECT DISTINCT strftime('%Y', date) as year FROM entries WHERE user_id = ? ORDER BY year DESC",
+            (current_user.id,)
         ).fetchall()
-    else:
-        # No entries exist for this user at all
+        available_years = [row['year'] for row in years_result]
+
+        # -- 3. Determine which year to display --
+        if not selected_year and available_years:
+            # Defaults to the most recent year if none is chosen.
+            selected_year = int(available_years[0])
+        elif selected_year and str(selected_year) not in available_years:
+            # Handle case where user types a year with no entries, default to most recent.
+            flash(f"No entries found for the year {selected_year}.", "warning")
+            selected_year = int(available_years[0]) if available_years else None
+
+        # -- 4. Get paginated entries for the selected year --
+        if selected_year:
+            # Get total count for pagination
+            total_entries_count = conn.execute(
+                "SELECT COUNT(id) FROM entries WHERE user_id = ? AND strftime('%Y', date) = ?",
+                (current_user.id, str(selected_year))
+            ).fetchone()[0]
+
+            total_pages = (total_entries_count + PER_PAGE - 1) // PER_PAGE
+
+            # Get the actual entries for the current page
+            offset = (page - 1) * PER_PAGE
+            rows = conn.execute(
+                "SELECT * FROM entries WHERE user_id = ? AND strftime('%Y', date) = ? ORDER BY date ASC LIMIT ? OFFSET ?",
+                (current_user.id, str(selected_year), PER_PAGE, offset)
+            ).fetchall()
+        else:
+            # No entries exist for this user at all
+            rows = []
+            total_pages = 0
+    except DatabaseError as e:
+        app.logger.exception(f"Database error on home route for user {current_user.id}: {e}")
+        flash("There was a problem loading your entries. Please try again.", "error")
+        available_years = []
+        selected_year = None
         rows = []
         total_pages = 0
 
-
-    # Close the connection immediately after fetching data.
-    conn.close()
+    finally:
+        # Close the connection immediately after fetching data.
+        if conn is not None:
+            conn.close()
 
     # -- 5. Process rows for display --
     # Convert rows to dictionaries so utils.py can modify the data (add week_num, etc.)
@@ -414,13 +559,21 @@ def add():
         notes = request.form["notes"]
 
         # Save to the database.
-        conn = get_db_connection()
-        conn.execute(
-            "INSERT INTO entries (date, miles, earnings, notes, user_id) VALUES (?, ?, ?, ?, ?)",
-            (date_to_save, miles, earnings, notes, current_user.id),
-        )
-        conn.commit()
-        conn.close()
+        conn = None
+        try:
+            conn = get_db_connection()
+            conn.execute(
+                "INSERT INTO entries (date, miles, earnings, notes, user_id) VALUES (?, ?, ?, ?, ?)",
+                (date_to_save, miles, earnings, notes, current_user.id),
+            )
+            conn.commit()
+        except DatabaseError as e:
+            app.logger.exception(f"Database error while adding entry for user {current_user.id}: {e}")
+            flash("There was a problem saving your entry. Please try again.", "error")
+            return redirect(url_for("add"))
+        finally:
+            if conn is not None:
+                conn.close()
 
         # Redirect back to the home page to see the new entry.
         return redirect(url_for("home"))
@@ -441,14 +594,24 @@ def add():
 @login_required
 def edit(id):
     # 1. Connect to the database.
-    conn = get_db_connection()
+    conn = None
+    try:
+        conn = get_db_connection()
 
-    # 2. Fetch the existing entry.
-    # We need the current data to pre-fill the form so the user sees what they are editing.
-    # We also check 'AND user_id = ?' to ensure users can't edit someone else's data.
-    entry = conn.execute('SELECT * FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id)).fetchone()
+        # 2. Fetch the existing entry.
+        # We need the current data to pre-fill the form so the user sees what they are editing.
+        # We also check 'AND user_id = ?' to ensure users can't edit someone else's data.
+        entry = conn.execute('SELECT * FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id)).fetchone()
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while loading entry {id} for edit: {e}")
+        flash("There was a problem loading that entry. Please try again.", "error")
+        if conn is not None:
+            conn.close()
+        return redirect(url_for("home"))
 
     if entry is None:
+        if conn is not None:
+            conn.close()
         flash("Entry not found or access denied.", "error")
         return redirect(url_for("home"))
 
@@ -489,14 +652,21 @@ def edit(id):
         # 4. Update the Database
         # "UPDATE entries SET ..." modifies the existing row.
         # We use the 'id' to make sure we don't overwrite the wrong entry.
-        conn.execute(
-            "UPDATE entries SET date = ?, miles = ?, earnings = ?, notes = ? WHERE id = ? AND user_id = ?",
-            (date_to_save, miles, earnings, notes, id, current_user.id),
-        )
+        try:
+            conn.execute(
+                "UPDATE entries SET date = ?, miles = ?, earnings = ?, notes = ? WHERE id = ? AND user_id = ?",
+                (date_to_save, miles, earnings, notes, id, current_user.id),
+            )
 
-        # Save the changes and close connection.
-        conn.commit()
-        conn.close()
+            # Save the changes and close connection.
+            conn.commit()
+        except DatabaseError as e:
+            app.logger.exception(f"Database error while updating entry {id} for user {current_user.id}: {e}")
+            flash("There was a problem updating your entry. Please try again.", "error")
+            return redirect(url_for("edit", id=id))
+        finally:
+            if conn is not None:
+                conn.close()
 
         # Redirect back to home page.
         flash("Entry updated successfully!", "success")
@@ -504,7 +674,8 @@ def edit(id):
 
     # 5. Handle Page Load (GET).
     # If we are just viewing the page, close the connection (we already fetched 'entry' at the top).
-    conn.close()
+    if conn is not None:
+        conn.close()
 
     # 6. Format Data for Display.
     # Convert the database row to a dictionary so we can modify values.
@@ -538,17 +709,25 @@ def edit(id):
 @app.route("/delete/<int:id>", methods=("POST",))
 @login_required
 def delete(id):
-    # 1. Connect to the database.
-    conn = get_db_connection()
+    conn = None
+    try:
+        # 1. Connect to the database.
+        conn = get_db_connection()
 
-    # 2. Execute the Delete Command.
-    # 'DELETE FROM entries WHERE id = ?' removes the row with the matching ID and User ID.
-    # The (id,) tuple provides the value for the '?' placeholder.
-    conn.execute('DELETE FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id))
+        # 2. Execute the Delete Command.
+        # 'DELETE FROM entries WHERE id = ?' removes the row with the matching ID and User ID.
+        # The (id,) tuple provides the value for the '?' placeholder.
+        conn.execute('DELETE FROM entries WHERE id = ? AND user_id = ?', (id, current_user.id))
 
-    # 3. Save changes and close the connection
-    conn.commit()
-    conn.close()
+        # 3. Save changes.
+        conn.commit()
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while deleting entry {id} for user {current_user.id}: {e}")
+        flash("There was a problem deleting that entry. Please try again.", "error")
+        return redirect(url_for("home"))
+    finally:
+        if conn is not None:
+            conn.close()
 
     #4. Redirect back to the home page.
     flash("Entry deleted.", "error")
@@ -581,13 +760,21 @@ def account():
 @app.route("/delete_account", methods=("POST",))
 @login_required
 def delete_account():
-    conn = get_db_connection()
-    # Delete all entries belonging to the user first
-    conn.execute("DELETE FROM entries WHERE user_id = ?", (current_user.id,))
-    # Then delete the user itself
-    conn.execute("DELETE FROM users WHERE id = ?", (current_user.id,))
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        conn = get_db_connection()
+        # Delete all entries belonging to the user first
+        conn.execute("DELETE FROM entries WHERE user_id = ?", (current_user.id,))
+        # Then delete the user itself
+        conn.execute("DELETE FROM users WHERE id = ?", (current_user.id,))
+        conn.commit()
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while deleting account for user {current_user.id}: {e}")
+        flash("There was a problem deleting your account. Please try again.", "error")
+        return redirect(url_for('account'))
+    finally:
+        if conn is not None:
+            conn.close()
 
     logout_user()
     flash('Your account and all data have been deleted', 'success')
@@ -606,23 +793,35 @@ def register():
         username = request.form['username']
         password = request.form['password']
 
-        conn = get_db_connection()
-        # Check if user already exists
-        user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, email)).fetchone()
+        conn = None
+        try:
+            conn = get_db_connection()
+            # Check if user already exists
+            user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, email)).fetchone()
 
-        if user:
+            if user:
+                flash('Username or email already exists', 'error')
+                return redirect(url_for('register'))
+
+            # Security: Hash the password so we never store plain text passwords.
+            # If the database is hacked, the attacker only sees hashes, not real passwords.
+            hashed_pw = generate_password_hash(password)
+
+            # Save the new user
+            conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+                         (username, email, hashed_pw))
+            conn.commit()
+        except IntegrityError as e:
+            app.logger.exception(f"Integrity error during registration for username '{username}': {e}")
             flash('Username or email already exists', 'error')
-            conn.close()
             return redirect(url_for('register'))
-
-        # Security: Hash the password so we never store plain text passwords.
-        # If the database is hacked, the attacker only sees hashes, not real passwords.
-        hashed_pw = generate_password_hash(password)
-
-        # Save the new user
-        conn.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', (username, email, hashed_pw))
-        conn.commit()
-        conn.close()
+        except DatabaseError as e:
+            app.logger.exception(f"Database error during registration for username '{username}': {e}")
+            flash('There was a problem creating your account. Please try again.', 'error')
+            return redirect(url_for('register'))
+        finally:
+            if conn is not None:
+                conn.close()
 
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('login'))
@@ -639,11 +838,19 @@ def login():
         password = request.form['password']
         remember = True if request.form.get('remember') else False
 
-        conn = get_db_connection()
-        # Fetch the user record by username OR email
-        # We pass 'username' twice because we are checking it against two different columns.
-        user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, username)).fetchone()
-        conn.close()
+        conn = None
+        try:
+            conn = get_db_connection()
+            # Fetch the user record by username OR email
+            # We pass 'username' twice because we are checking it against two different columns.
+            user = conn.execute('SELECT * FROM users WHERE username = ? OR email = ?', (username, username)).fetchone()
+        except DatabaseError as e:
+            app.logger.exception(f"Database error during login for identifier '{username}': {e}")
+            flash('There was a problem logging you in. Please try again.', 'error')
+            return redirect(url_for('login'))
+        finally:
+            if conn is not None:
+                conn.close()
 
         # Verify user exists AND the password matches the stored hash.
         # check_password_hash handles the decryption/comparison securely.
@@ -676,10 +883,18 @@ def logout():
 @app.route("/export")
 @login_required
 def export():
-    # 1. Fetch all data for the current user
-    conn = get_db_connection()
-    rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id,)).fetchall()
-    conn.close()
+    conn = None
+    try:
+        # 1. Fetch all data for the current user
+        conn = get_db_connection()
+        rows = conn.execute("SELECT * FROM entries WHERE user_id = ? ORDER BY date ASC", (current_user.id,)).fetchall()
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while exporting entries for user {current_user.id}: {e}")
+        flash("There was a problem exporting your data. Please try again.", "error")
+        return redirect(url_for("home"))
+    finally:
+        if conn is not None:
+            conn.close()
 
     # 2. Create CSV in memory
     si = io.StringIO()
@@ -709,19 +924,23 @@ def update_theme():
     if theme not in ("light", "dark"):
         return "Invalid theme", 400
 
-    conn = get_db_connection()
-    conn.execute("UPDATE users SET theme = ? WHERE id = ?", (theme, current_user.id))
-    conn.commit()
-    conn.close()
-    return '', 204
+    conn = None
+    try:
+        conn = get_db_connection()
+        conn.execute("UPDATE users SET theme = ? WHERE id = ?", (theme, current_user.id))
+        conn.commit()
+        return '', 204
+    except DatabaseError as e:
+        app.logger.exception(f"Database error while updating theme for user {current_user.id}: {e}")
+        return 'Database error', 500
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 # Checks if this script is being run directly (e.g., 'python app.py').
 # If this file were imported into another script, this block would NOT run.
 if __name__ == "__main__":
-    # Initialize the database (create tables) before starting the server.
-    init_db()
-
     # Dev server only. In production, run with a WSGI server like gunicorn.
     debug = os.environ.get("FLASK_DEBUG") == "1"
     app.run(debug=debug, host="127.0.0.1", port=5050)

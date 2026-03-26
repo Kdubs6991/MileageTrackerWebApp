@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 
 ## [Unreleased]
+## [0.3.5] = 2026-03-26
+### Added
+- Pytest test suite covering:
+  - Utility functions (`test_utils.py`)
+  - Authentication routes (`test_auth.py`)
+  - Entry routes (`test_entries.py`)
+  - Error handling (`test_errors.py`)
+- Custom error pages for 400, 404, and 500 responses.
+- Centralized error handling with Flask error handlers.
+- Server-side logging with rotating log files (`logs/app.log`).
+- `conftest.py` with reusable test fixtures and temporary test database setup.
 
 ## [0.3.4] = 2026-02-14
 ### Added
